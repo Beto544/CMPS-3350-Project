@@ -58,7 +58,7 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 class Global {
 public:
-	int xres, yres, feature_mode;
+	int xres, yres;
 	char keys[65536];
 	Global() {
 		xres = 640;
@@ -505,7 +505,6 @@ int check_keys(XEvent *e)
 		case XK_Escape:
 			return 1;
 		case XK_f:
-			feature_mode = 1;
 			break;
 		case XK_s:
 			break;
@@ -779,9 +778,6 @@ void physics()
 	}
 }
 
-//references function in lgamboa.cpp
-extern void cool_down(float *color);
-
 void render()
 {
 	Rect r;
@@ -837,15 +833,6 @@ void render()
 		}
 		glEnd();
 	}
-	
-	if(gl.feature_mode == 1){
-		r.bot = gl.yres - 20;
-		r.left = g.xres / 2;
-		r.center = 1;
-		ggprint8b(&r, 16, 0x00FF89F1, "Asteroids - Now in Feature Mode!");
-		cool_down(g.ship.color);
-	}
-
 	//-------------------------------------------------------------------------
 	//Draw the asteroids
 	{
