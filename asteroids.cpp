@@ -1,7 +1,9 @@
+// Modifeid by : Hunberto Pascual
+// feature mode implementation
 //
 //program: asteroids.cpp
 //author:  Gordon Griesel
-//date:    2014 - 2021
+//date:    2014 - 2023
 //mod spring 2015: added constructors
 //This program is a game starting point for a 3350 project.
 //
@@ -60,6 +62,7 @@ class Global {
 public:
 	int xres, yres;
 	char keys[65536];
+    int feature_mode;
 	Global() {
 		xres = 640;
 		yres = 480;
@@ -505,6 +508,13 @@ int check_keys(XEvent *e)
 		case XK_Escape:
 			return 1;
 		case XK_f:
+            // toggle feature mode
+            if (shift) {
+                if (gl.feature_mode == 1) 
+                    gl.feature_mode = 0;
+                
+            } else 
+                    gl.feature_mode = 1;
 			break;
 		case XK_s:
 			break;
@@ -517,7 +527,6 @@ int check_keys(XEvent *e)
 	}
 	return 0;
 }
-
 void deleteAsteroid(Game *g, Asteroid *node)
 {
 	//Remove a node from doubly-linked list
@@ -782,13 +791,42 @@ void render()
 {
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
-	//
-	r.bot = gl.yres - 20;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
-	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+	if (gl.feature_mode) {
+    		int t = 40;
+		// render border
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glBegin(GL_TRIANGLE_STRIP);
+		glVertex2i(0,           0);
+        	glVertex2i(t,           t);
+        	glVertex2i(0,           gl.yres); // left side bottom
+        	glVertex2i(t,           gl.yres-t); // left s top
+        	glVertex2i(gl.xres-t,   gl.yres-t);// top  left
+        	glVertex2i(gl.xres,   gl.yres);// top right
+        	glVertex2i(gl.xres-t,   t);// right s top 
+		glVertex2i(gl.xres,   0); // right s bottom
+		glVertex2i(0,           0); // bottom right
+		glVertex2i(t,           t); //bottom left
+		glEnd();
+    		r.bot = gl.yres - 30;
+		r.left = gl.yres/2;
+		r.center = 0;
+		ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + F to EXIT");
+		extern void cool_down(float *color);
+    		cool_down(g.ship.color);
+	}
+    if (!gl.feature_mode) {
+	    // make the ship white
+	    g.ship.color[0] = 1.0;
+            g.ship.color[1] = 1.0;
+            g.ship.color[2] = 1.0;
+	    r.bot = gl.yres - 20;
+	    r.left = 10;
+	    r.center = 0;
+	    ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+	    ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+	    ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+	    ggprint8b(&r, 16, 0x00ffff00, "press f for feature mode");
+    }
 	//-------------------------------------------------------------------------
 	//Draw the ship
 	glColor3fv(g.ship.color);
@@ -796,10 +834,10 @@ void render()
 	glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
 	//float angle = atan2(ship.dir[1], ship.dir[0]);
 	glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
-	//glVertex2f(-10.0f, -10.0f);
-	//glVertex2f(  0.0f, 20.0f);
-	//glVertex2f( 10.0f, -10.0f);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(-10.0f, -10.0f);
+	glVertex2f(  0.0f, 20.0f);
+	glVertex2f( 10.0f, -10.0f);
 	glVertex2f(-12.0f, -10.0f);
 	glVertex2f(  0.0f,  20.0f);
 	glVertex2f(  0.0f,  -6.0f);
