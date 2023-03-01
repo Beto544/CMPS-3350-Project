@@ -1,11 +1,11 @@
 void green_ship(float *color) {
-    color[0] -= 0.05; // decrease red
-    color[2] -= 0.05; // decrease blue
+    color[0] -= 0.05; 
+    color[2] -= 0.05; 
     if (color[1] < 0.0)
-        color[1] = 1.0; // max red value
+        color[1] = 1.0; 
 
     if (color[2] < 0.0)
-        color[2] = 0.0; // min blue value
+        color[2] = 0.0; 
 
 
 }
