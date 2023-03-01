@@ -1,3 +1,4 @@
+// Oscar Castillo
 void green_ship(float *color) {
     color[0] -= 0.05; 
     color[2] -= 0.05; 
