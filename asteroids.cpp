@@ -22,6 +22,8 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "fonts.h"
+//#include "lgamboa.h"
+#include "hpascual.h"
 
 //defined types
 typedef float Flt;
@@ -507,17 +509,48 @@ int check_keys(XEvent *e)
 	switch (key) {
 		case XK_Escape:
 			return 1;
-		case XK_f:
-            // toggle feature mode
-            if (shift) {
+		case XK_1:
+	// toggle feature modes with 1,2,3,4,5
+	if (shift) {
                 if (gl.feature_mode == 1) 
                     gl.feature_mode = 0;
                 
-            } else 
-                    gl.feature_mode = 1;
-			break;
-		case XK_s:
-			break;
+            	} else 
+			gl.feature_mode = 1;
+		break;
+		case XK_2:
+	if (shift) {
+		if (gl.feature_mode > 0)
+                    gl.feature_mode = 0;
+                
+            	} else 
+                    	gl.feature_mode = 2;
+		break;
+		case XK_3:
+	if (shift) {
+		if (gl.feature_mode > 0)
+			gl.feature_mode = 0;
+
+            	} else
+                    	gl.feature_mode = 3;
+                break;
+		case XK_4:
+	if (shift) {
+		if (gl.feature_mode > 0)
+			gl.feature_mode = 0;
+
+            	} else
+                    	gl.feature_mode = 4;
+                break;
+		case XK_5:
+	if (shift) {
+		if (gl.feature_mode > 0)
+			gl.feature_mode = 0;
+
+            	} else
+                    	gl.feature_mode = 5;
+                break;
+
 		case XK_Down:
 			break;
 		case XK_equal:
@@ -792,8 +825,8 @@ void render()
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (gl.feature_mode) {
+		/* render green border
     		int t = 40;
-		// render border
 		glColor3f(0.0f, 1.0f, 0.0f);
 		glBegin(GL_TRIANGLE_STRIP);
 		glVertex2i(0,           0);
@@ -807,12 +840,36 @@ void render()
 		glVertex2i(0,           0); // bottom right
 		glVertex2i(t,           t); //bottom left
 		glEnd();
+		*/
     		r.bot = gl.yres - 30;
 		r.left = gl.yres/2;
 		r.center = 0;
-		ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + F to EXIT");
-		extern void cool_down(float *color);
-    		cool_down(g.ship.color);
+		//extern void cool_down(float *color);
+		if (gl.feature_mode == 1) {
+			extern void heat_up(float *color);
+    			heat_up(g.ship.color);
+			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 1 to EXIT");
+
+		}
+		if (gl.feature_mode == 2) {
+			rainbow_ship(g.ship.color);	
+			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 2 to EXIT");
+		}
+		if (gl.feature_mode == 3) {
+			extern void green_ship(float *color);
+    			green_ship(g.ship.color);
+			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 3 to EXIT");
+		}
+		if (gl.feature_mode == 4) {
+			extern void cool_down(float *color);
+    			cool_down(g.ship.color);
+			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 4 to EXIT");
+		}
+		if (gl.feature_mode == 5) {
+			extern void pink_ship(float *color);
+    			pink_ship(g.ship.color);
+			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 5 to EXIT");
+		}
 	}
     if (!gl.feature_mode) {
 	    // make the ship white
@@ -825,7 +882,9 @@ void render()
 	    ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
 	    ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	    ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
-	    ggprint8b(&r, 16, 0x00ffff00, "press f for feature mode");
+	    ggprint8b(&r, 16, 0x00ffff00, "press 1, 2, 3, 4, or 5 for feature modes");
+
+
     }
 	//-------------------------------------------------------------------------
 	//Draw the ship

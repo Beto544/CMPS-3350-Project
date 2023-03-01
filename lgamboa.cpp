@@ -1,6 +1,6 @@
 //Linda Gamboa
 
-void cool_down(float *color){
+void heat_up(float *color){
     color[1] += 0.01;
     color[2] += 0.01;
 
@@ -10,5 +10,5 @@ void cool_down(float *color){
     if(color[2] > 1.0){
         color[2] = 0.1;
     }
-    return;
+    //return;
 }
