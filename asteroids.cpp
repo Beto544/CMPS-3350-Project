@@ -41,7 +41,7 @@ typedef Flt	Matrix[4][4];
 						(c)[1]=(a)[1]-(b)[1]; \
 						(c)[2]=(a)[2]-(b)[2]
 
-double 	fuel_tank = 100.0;
+double fuel_tank = 100.0;
 
 //constants
 const float timeslice = 1.0f;
@@ -802,6 +802,7 @@ void physics()
 		}
         }
 	else {
+		fuel_tank = 100.0;
 		if (gl.keys[XK_Up]) {
 			//apply thrust
 			//convert ship angle to radians
