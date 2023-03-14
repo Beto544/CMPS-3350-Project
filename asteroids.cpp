@@ -40,9 +40,6 @@ typedef Flt	Matrix[4][4];
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
 						(c)[1]=(a)[1]-(b)[1]; \
 						(c)[2]=(a)[2]-(b)[2]
-
-double fuel_tank = 100.0;
-
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
@@ -67,7 +64,7 @@ class Global {
 public:
 	int xres, yres;
 	char keys[65536];
-    int feature_mode;
+	int feature_mode;
 	Global() {
 		xres = 640;
 		yres = 480;
@@ -100,6 +97,7 @@ class Bullet {
 public:
 	Vec pos;
 	Vec vel;
+	float mass;
 	float color[3];
 	struct timespec time;
 public:
@@ -460,7 +458,6 @@ void check_mouse(XEvent *e)
 				g.ship.angle += 360.0f;
 		}
 		if (ydiff > 0) {
-			
 			//apply thrust
 			//convert ship angle to radians
 			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
@@ -470,7 +467,7 @@ void check_mouse(XEvent *e)
 			g.ship.vel[0] += xdir * (float)ydiff * 0.01f;
 			g.ship.vel[1] += ydir * (float)ydiff * 0.01f;
 			Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-						g.ship.vel[1]*g.ship.vel[1]);
+												g.ship.vel[1]*g.ship.vel[1]);
 			if (speed > 10.0f) {
 				speed = 10.0f;
 				normalize2d(g.ship.vel);
@@ -511,18 +508,6 @@ int check_keys(XEvent *e)
 	}
 	(void)shift;
 	switch (key) {
-	// fuel feature mode
-		case XK_f:
-        // toggle feature modes with 1,2,3,4,5
-        if (shift) {
-                if (gl.feature_mode == 12)
-                    gl.feature_mode = 0;
-
-                } else
-                        gl.feature_mode = 12;
-                break;
-
-		 
 		case XK_Escape:
 			return 1;
 		case XK_1:
@@ -629,9 +614,9 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 	//std::cout << "frag" << std::endl;
 }
 
+
 void physics()
 {
-
 	Flt d0,d1,dist;
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
@@ -676,12 +661,20 @@ void physics()
 		}
 		else if (b->pos[0] > (float)gl.xres) {
 			b->pos[0] -= (float)gl.xres;
+			if (gl.feature_mode == 3) {
+			    extern float bullet_gravity(float GRAVITY);
+			    b->pos[0] -= bullet_gravity(g.nbullets);
+			}
 		}
 		else if (b->pos[1] < 0.0) {
 			b->pos[1] += (float)gl.yres;
 		}
 		else if (b->pos[1] > (float)gl.yres) {
 			b->pos[1] -= (float)gl.yres;
+			if (gl.feature_mode == 3) {
+			    extern float bullet_gravity(float GRAVITY);
+			    b->pos[1] -= bullet_gravity(g.nbullets);
+			}
 		}
 		++i;
 	}
@@ -776,50 +769,22 @@ void physics()
 		if (g.ship.angle < 0.0f)
 			g.ship.angle += 360.0f;
 	}
-	if (gl.feature_mode ==12 ) {
-		//fuel_tank = shipFuelTest(fuel_tank);
-		if ( gl.keys[XK_Up] && fuel_tank > 0.0) {
-                	// apply thrust and reduce fuel
-                	//shipFuelTest(fuel_tank);
-					fuel_tank = fuel_tank - .5;
-					shipFuelTest(fuel_tank);
-                	// convert ship angle to radians
-                	Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-                	// convert angle to a vector
-                	Flt xdir = cos(rad);
-                	Flt ydir = sin(rad);
-                	g.ship.vel[0] += xdir*0.01f;
-                	g.ship.vel[1] += ydir*0.01f;
-                	Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-                        g.ship.vel[1]*g.ship.vel[1]);
-		
-                if (speed > 10.0f) {
-                        speed = 10.0f;
-                        normalize2d(g.ship.vel);
-                        g.ship.vel[0] *= speed;
-                        g.ship.vel[1] *= speed;
-                }
-		}
-        }
-	else {
-		fuel_tank = 100.0;
-		if (gl.keys[XK_Up]) {
-			//apply thrust
-			//convert ship angle to radians
-			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-			//convert angle to a vector
-			Flt xdir = cos(rad);
-			Flt ydir = sin(rad);
-			g.ship.vel[0] += xdir*0.02f;
-			g.ship.vel[1] += ydir*0.02f;
-			Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-					g.ship.vel[1]*g.ship.vel[1]);
-			if (speed > 10.0f) {
-				speed = 10.0f;
-				normalize2d(g.ship.vel);
-				g.ship.vel[0] *= speed;
-				g.ship.vel[1] *= speed;
-			}
+	if (gl.keys[XK_Up]) {
+		//apply thrust
+		//convert ship angle to radians
+		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+		//convert angle to a vector
+		Flt xdir = cos(rad);
+		Flt ydir = sin(rad);
+		g.ship.vel[0] += xdir*0.02f;
+		g.ship.vel[1] += ydir*0.02f;
+		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
+				g.ship.vel[1]*g.ship.vel[1]);
+		if (speed > 10.0f) {
+			speed = 10.0f;
+			normalize2d(g.ship.vel);
+			g.ship.vel[0] *= speed;
+			g.ship.vel[1] *= speed;
 		}
 	}
 	if (gl.keys[XK_space]) {
@@ -870,24 +835,22 @@ void render()
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (gl.feature_mode) {
-		// render green border
+		/* render green border
     		int t = 40;
 		glColor3f(0.0f, 1.0f, 0.0f);
 		glBegin(GL_TRIANGLE_STRIP);
-		glColor3f(0.0, 1.0, 0.0);
-    	glBegin(GL_TRIANGLE_STRIP);
-        glVertex2i(0,           0);
-        glVertex2i(t,           t);
-        glVertex2i(0,           gl.yres);
-        glVertex2i(t,           gl.yres-t);
-        glVertex2i(gl.xres,     gl.yres);
-        glVertex2i(gl.xres-t,   gl.yres-t);
-        glVertex2i(gl.xres,     0);
-        glVertex2i(gl.xres-t,   t);
-        glVertex2i(0,           0);
-        glVertex2i(t,           t);
-    	glEnd();		
-		//
+		glVertex2i(0,           0);
+        	glVertex2i(t,           t);
+        	glVertex2i(0,           gl.yres); // left side bottom
+        	glVertex2i(t,           gl.yres-t); // left s top
+        	glVertex2i(gl.xres-t,   gl.yres-t);// top  left
+        	glVertex2i(gl.xres,   gl.yres);// top right
+        	glVertex2i(gl.xres-t,   t);// right s top 
+		glVertex2i(gl.xres,   0); // right s bottom
+		glVertex2i(0,           0); // bottom right
+		glVertex2i(t,           t); //bottom left
+		glEnd();
+		*/
     		r.bot = gl.yres - 30;
 		r.left = gl.yres/2;
 		r.center = 0;
@@ -917,19 +880,6 @@ void render()
     			pink_ship(g.ship.color);
 			ggprint8b(&r, 0, 0x00ff0000, "Feature Mode - Shift + 5 to EXIT");
 		}
-		// Hunberto's feature mode -- Gives the ship a fuel tank, no fuel cant move
-		if (gl.feature_mode == 12) {
-			//confineShipToWindow();
-			//x11.show_mouse_cursor(1);
-			if (fuel_tank > 0) {
-				ggprint8b(&r, 0, 0x00ff0000, "Fuel Level: %.2f", fuel_tank);
-			}
-			if (fuel_tank == 0.0) {
-					ggprint8b(&r, 16, 0x00ff0000, "Out of Fuel!");
-			}
-
-	}
-
 	}
     if (!gl.feature_mode) {
 	    // make the ship white
@@ -943,7 +893,7 @@ void render()
 	    ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	    ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	    ggprint8b(&r, 16, 0x00ffff00, "press 1, 2, 3, 4, or 5 for feature modes");
-	    ggprint8b(&r, 16, 0x00ffff00, "f for Fuel testing");
+
 
     }
 	//-------------------------------------------------------------------------
@@ -972,28 +922,23 @@ void render()
 	if (gl.keys[XK_Up] || g.mouseThrustOn) {
 		int i;
 		//draw thrust
-		if (gl.feature_mode ==12 && fuel_tank == 0.0) {
-
+		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+		//convert angle to a vector
+		Flt xdir = cos(rad);
+		Flt ydir = sin(rad);
+		Flt xs,ys,xe,ye,r;
+		glBegin(GL_LINES);
+		for (i=0; i<16; i++) {
+			xs = -xdir * 11.0f + rnd() * 4.0 - 2.0;
+			ys = -ydir * 11.0f + rnd() * 4.0 - 2.0;
+			r = rnd()*40.0+40.0;
+			xe = -xdir * r + rnd() * 18.0 - 9.0;
+			ye = -ydir * r + rnd() * 18.0 - 9.0;
+			glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
+			glVertex2f(g.ship.pos[0]+xs,g.ship.pos[1]+ys);
+			glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
 		}
-		else {
-			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-			//convert angle to a vector
-			Flt xdir = cos(rad);
-			Flt ydir = sin(rad);
-			Flt xs,ys,xe,ye,r;
-			glBegin(GL_LINES);
-			for (i=0; i<16; i++) {
-				xs = -xdir * 11.0f + rnd() * 4.0 - 2.0;
-				ys = -ydir * 11.0f + rnd() * 4.0 - 2.0;
-				r = rnd()*40.0+40.0;
-				xe = -xdir * r + rnd() * 18.0 - 9.0;
-				ye = -ydir * r + rnd() * 18.0 - 9.0;
-				glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
-				glVertex2f(g.ship.pos[0]+xs,g.ship.pos[1]+ys);
-				glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
-			}
-			glEnd();
-		}
+		glEnd();
 	}
 	//-------------------------------------------------------------------------
 	//Draw the asteroids

@@ -1,4 +1,5 @@
 // Oscar Castillo
+
 void green_ship(float *color) {
     color[0] -= 0.05; 
     color[2] -= 0.05; 
@@ -9,4 +10,9 @@ void green_ship(float *color) {
         color[2] = 0.0; 
 
 
+}
+
+float bullet_gravity(float GRAVITY) {
+    GRAVITY = 9.80665;
+    return GRAVITY;
 }
