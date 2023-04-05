@@ -1,12 +1,11 @@
 // global.cpp
 #include "global.h"
-#include "hpascual.h"
 #include <cstring>
 
 
 Global::Global() {
-		xres = 1000;
-		yres = 680;
+		xres = 1200;
+		yres = 780;
 		std::memset(ship_keys, 0, 65536);
 		std::memset(ship2_keys, 0, 65536);
 }
@@ -19,6 +18,7 @@ Ship::Ship() {
 		VecZero(vel);
 		VecZero(acc);
 		angle = 0.0;
+		radius = 30;
 		color[0] = color[1] = color[2] = 1.0;
 }
 

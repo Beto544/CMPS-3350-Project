@@ -10,42 +10,48 @@ class hpascual{
 // prototypes
 extern void rainbow_ship(float *color);
 extern void renderTanks();
-
-class Tank {
+extern double timeDiff(struct timespec *start, struct timespec *end);
+extern void timeCopy(struct timespec *dest, struct timespec *source);
+extern void shootCannon(Ship *curr_tank);
+extern bool gameOver();
+class TankStats {
 public:
-    Tank(double initialHealth, double initialFuel, int initialBullets) {
-        health = initialHealth;
-        fuel = initialFuel;
-        bullets = initialBullets;
-	}
-	double getHealth() const {
-        return health;
-    }
+    TankStats();
 
-    double getFuel() const {
-        return fuel;
-    }
+    double getHealth() const;
+    double getFuel() const;
+    int getBullets() const;
+    void decreaseHealth(double amount);
+    void decreaseFuel(double amount);
+    void decreaseBullets(int amount);
+    void reset();
+    bool getLoser() const;
 
-    int getBullets() const {
-        return bullets;
-    }
-
-    void decreaseHealth(double amount) {
-        health -= amount;
-    }
-
-    void decreaseFuel(double amount) {
-        fuel -= amount;
-    }
-
-    void decreaseBullets(int amount) {
-        bullets -= amount;
-    }
 private:
     double health;
     double fuel;
     int bullets;
+    bool loser;
 };
+
+class GameStats {
+public:
+    GameStats();
+
+    void increasePlayer1Wins();
+    void increasePlayer2Wins();
+    int getPlayer1Wins() const;
+    int getPlayer2Wins() const;
+    int getRoundsPlayed() const;
+    bool getGameStatus() const;
+
+private:
+    int player1Wins;
+    int player2Wins;
+    int roundsPlayed;
+    bool gameOver;
+};
+
 
 
 //extern void moveTank(Ship *curr_tank, Tank *tanky, int player);

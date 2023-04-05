@@ -13,7 +13,6 @@
 //#include <GL/glu.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-#include "hpascual.h"
 #include <time.h>
 #include <GL/gl.h>
 
@@ -58,6 +57,7 @@ class Ship {
 				Vec dir;
 				Vec vel;
 				Vec acc;
+				Flt radius;
 				float angle;
 				float color[3];
 		public:
