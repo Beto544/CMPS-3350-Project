@@ -1,154 +1,192 @@
 // hunberto Pascual
 #include "hpascual.h"
-
 #include <ctime>
 #include <iostream>
-
+#include "fonts.h"
 #include "global.h"
 
 extern int currentPlayer;
-// extern bool gameOver;
 extern float cannonVelocity1;
 extern float cannonVelocity2;
+extern bool tankHit;
+extern bool cannonFired;
+extern bool boxHit;
+extern bool showControls;
+extern bool newRound;
+extern Bullet *b;
 extern GameStats game;
 extern TankStats playerTank;
 extern TankStats enemyTank;
+extern Box box[1];
+float bx;
+float by;
 
 TankStats::TankStats()
-    : health(100), fuel(100), bullets(20), loser(false) {
+    : health(100), fuel(100), bullets(20), loser(false) 
+{
 }
 
-double TankStats::getHealth() const {
+double TankStats::getHealth() const 
+{
     return health;
 }
 
-double TankStats::getFuel() const {
+double TankStats::getFuel() const 
+{
     return fuel;
 }
 
-int TankStats::getBullets() const {
+int TankStats::getBullets() const 
+{
     return bullets;
 }
 
-void TankStats::decreaseHealth(double amount) {
+void TankStats::decreaseHealth(double amount) 
+{
     health -= amount;
 }
 
-void TankStats::decreaseFuel(double amount) {
+void TankStats::decreaseFuel(double amount) 
+{
     fuel -= amount;
 }
 
-void TankStats::decreaseBullets(int amount) {
+void TankStats::decreaseBullets(int amount) 
+{
     bullets -= amount;
 }
-void TankStats::reset() {
+
+void TankStats::reset() 
+{
     health = 100;
     fuel = 100;
-    bullets = 10;
+    bullets = 20;
 }
+
 bool TankStats::getLoser() const {
     if (health <= 0) {
-        // gameOver = true;
         return true;
     }
     return false;
 }
 
 GameStats::GameStats()
-    : player1Wins(0), player2Wins(0), roundsPlayed(0), gameOver(false) {
+    : player1Wins(0), player2Wins(0), roundsPlayed(0), gameOver(false) 
+{
 }
 
-void GameStats::increasePlayer1Wins() {
+void GameStats::increasePlayer1Wins() 
+{
     player1Wins++;
     roundsPlayed++;
 }
 
-void GameStats::increasePlayer2Wins() {
+void GameStats::increasePlayer2Wins() 
+{
     player2Wins++;
     roundsPlayed++;
 }
 
-int GameStats::getPlayer1Wins() const {
+int GameStats::getPlayer1Wins() const 
+{
     return player1Wins;
 }
 
-int GameStats::getPlayer2Wins() const {
+int GameStats::getPlayer2Wins() const 
+{
     return player2Wins;
 }
 
-int GameStats::getRoundsPlayed() const {
+int GameStats::getRoundsPlayed() const 
+{
     return roundsPlayed;
 }
-bool GameStats::getGameStatus() const {
+
+bool GameStats::getGameStatus() const 
+{
     return false;
 }
 
-void shootCannon(Ship *curr_tank) {
-    // a little time between each bullet
-    float cannonVelocity = 0;
+Box::Box() 
+{
+    w = 0.0f;
+    h = 0.0f;
+    pos[0] = (gl.xres / 2) - 200;
+    pos[1] = (gl.yres / 4) - 55;
+    radius = 50;
+}
+
+Box::Box(int wid, int hgt, int x, int y) 
+{
+    w = wid;
+    h = hgt;
+    pos[0] = x;
+    pos[1] = y;
+}
+
+void moveTank(Tank *curr_tank) 
+{
     if (currentPlayer % 2 == 0) {
-        cannonVelocity = cannonVelocity1;
-    } else {
-        cannonVelocity = cannonVelocity2;
-    }
-    struct timespec bt;
-    clock_gettime(CLOCK_REALTIME, &bt);
-    double ts = timeDiff(&g.bulletTimer, &bt);
-    if (ts > 0.1) {
-        timeCopy(&g.bulletTimer, &bt);
-        if (g.nbullets < 1) {
-            //  shoot a bullet...
-            Bullet *b = &g.barr[g.nbullets];
-            timeCopy(&b->time, &bt);
-            b->pos[0] = curr_tank->pos[0];
-            b->pos[1] = curr_tank->pos[1];
-            b->vel[0] = curr_tank->vel[0];
-            b->vel[1] = curr_tank->vel[1];
-            // convert ship cannon angle to radians
-            Flt rad = ((curr_tank->angle) / 360.0f) * PI * 2.0;
-            // convert angle to a vector
-            Flt xdir = cos(rad);
-            Flt ydir = sin(rad);
-            b->pos[0] += xdir * 20.0f;
-            b->pos[1] += ydir * 20.0f;
-            b->vel[0] += xdir * cannonVelocity + rnd() * 1.4;
-            b->vel[1] += ydir * cannonVelocity + rnd() * 1.4;
-            b->color[0] = 1.0f;
-            b->color[1] = 1.0f;
-            b->color[2] = 1.0f;
-            g.nbullets++;
-            if (currentPlayer % 2 == 0) {
-                playerTank.decreaseBullets(1);
-            } else {
-                enemyTank.decreaseBullets(1);
+        if (gl.tank_keys[XK_a]) {
+            if (playerTank.getFuel() >= 0) {
+                curr_tank->pos[0] -= 0.30;
+                playerTank.decreaseFuel(.1);
             }
-            currentPlayer++;
-            return;
-        } else {
-            return;
         }
+        if (gl.tank_keys[XK_d]) {
+            if (playerTank.getFuel() >= 0) {
+                curr_tank->pos[0] += 0.30;
+                playerTank.decreaseFuel(.1);
+            }
+        }
+
+    } else {
+        if (gl.tank2_keys[XK_a]) {
+            if (enemyTank.getFuel() >= 0) {
+                curr_tank->pos[0] -= 0.30;
+                enemyTank.decreaseFuel(.1);
+            }
+        }
+        if (gl.tank2_keys[XK_d]) {
+            if (enemyTank.getFuel() >= 0) {
+                curr_tank->pos[0] += 0.30;
+                enemyTank.decreaseFuel(.1);
+            }
+        }
+    }
+    // Keep Tank within screen
+    if (curr_tank->pos[0] < 0.0) {  // left side
+        curr_tank->pos[0] = ((float)gl.xres - (float)gl.xres) + 10;
+    } else if (curr_tank->pos[0] > (float)gl.xres) {  // right side
+        curr_tank->pos[0] = ((float)gl.xres) - 10;
+    } else if (curr_tank->pos[1] < 0.0) {  // bottom
+        curr_tank->pos[1] = ((float)gl.yres - (float)gl.yres) + 10;
+    } else if (curr_tank->pos[1] > (float)gl.yres) {  // top
+        curr_tank->pos[1] = ((float)gl.yres) - 10;
     }
 }
 
-bool gameOver() {
+bool gameOver() 
+{
     if (playerTank.getLoser() == true || enemyTank.getLoser() == true) {
         return true;
     }
     return false;
 }
 
-void renderTanks() {
+void renderTanks() 
+{
     // Draw Tank 1
-    g.ship.color[0] = 1.0;
-    g.ship.color[1] = 1.0;
-    g.ship.color[2] = 0.;
-    glColor3fv(g.ship.color);
+    g.tank.color[0] = 1.0;
+    g.tank.color[1] = 1.0;
+    g.tank.color[2] = 0.;
+    glColor3fv(g.tank.color);
     glPushMatrix();
-    glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
+    glTranslatef(g.tank.pos[0], g.tank.pos[1], g.tank.pos[2]);
     glScalef(0.75f, 0.75f, 0.75f);              // scale the tank 75%
-    glRotatef(g.ship.angle, 0.0f, 0.0f, 0.0f);  // no TankStats rotation
+    glRotatef(g.tank.angle, 0.0f, 0.0f, 0.0f);  // no Tank body rotation
     glBegin(GL_QUADS);
-    // draw TankStats body
+    // draw Tank body
     glVertex2f(-30.0f, -15.0f);
     glVertex2f(-30.0f, 15.0f);
     glVertex2f(30.0f, 15.0f);
@@ -168,10 +206,10 @@ void renderTanks() {
     glPopMatrix();
     // Draw the cannon
     glPushMatrix();
-    glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
-    glTranslatef(15.0f, 0.0f, 0.0f);            // Move to the position of the cannon
-    glScalef(0.75f, 0.75f, 0.75f);              // scale the tank 75%
-    glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);  // Rotate the cannon
+    glTranslatef(g.tank.pos[0], g.tank.pos[1], g.tank.pos[2]);
+    glTranslatef(15.0f, 0.0f, 0.0f);  // Move to the position of the cannon
+    glScalef(0.75f, 0.75f, 0.75f);    // scale the tank 75%
+    glRotatef(g.tank.angle, 0.0f, 0.0f, 1.0f);  // Rotate the cannon
     glBegin(GL_QUADS);
     glVertex2f(15.0f, -7.5f);
     glVertex2f(15.0f, 7.5f);
@@ -180,23 +218,23 @@ void renderTanks() {
     glEnd();
     glPopMatrix();
     // Draw Tank 2
-    g.ship2.color[0] = 1.0;
-    g.ship2.color[1] = 0;
-    g.ship2.color[2] = 0.;
-    glColor3fv(g.ship2.color);
+    g.tank2.color[0] = 1.0;
+    g.tank2.color[1] = 0;
+    g.tank2.color[2] = 0.;
+    glColor3fv(g.tank2.color);
     glPushMatrix();
-    glTranslatef(g.ship2.pos[0], g.ship2.pos[1], g.ship2.pos[2]);
+    glTranslatef(g.tank2.pos[0], g.tank2.pos[1], g.tank2.pos[2]);
     glScalef(0.75f, 0.75f, 0.75f);               // scale the tank 75%
-    glRotatef(g.ship2.angle, 0.0f, 0.0f, 0.0f);  // no TankStats rotation
+    glRotatef(g.tank2.angle, 0.0f, 0.0f, 0.0f);  // no Tank body rotation
     glBegin(GL_QUADS);
-    // TankStats body
+    // Tank body
     glVertex2f(-30.0f, -15.0f);
     glVertex2f(-30.0f, 15.0f);
     glVertex2f(30.0f, 15.0f);
     glVertex2f(30.0f, -15.0f);
     // change the color of the tracks
     glColor3f(0.0f, 0.0f, 0.0f);
-    // TankStats tracks
+    // Tank tracks
     glVertex2f(-33.0f, -18.0f);
     glVertex2f(-33.0f, -12.0f);
     glVertex2f(33.0f, -12.0f);
@@ -209,10 +247,10 @@ void renderTanks() {
     glPopMatrix();
     // Draw the cannon
     glPushMatrix();
-    glTranslatef(g.ship2.pos[0], g.ship2.pos[1], g.ship2.pos[2]);
-    glTranslatef(15.0f, 0.0f, 0.0f);             // Move to the position of the cannon
-    glScalef(0.75f, 0.75f, 0.75f);               // scale the tank 75%
-    glRotatef(g.ship2.angle, 0.0f, 0.0f, 1.0f);  // Rotate the cannon
+    glTranslatef(g.tank2.pos[0], g.tank2.pos[1], g.tank2.pos[2]);
+    glTranslatef(15.0f, 0.0f, 0.0f); 
+    glScalef(0.75f, 0.75f, 0.75f); // scale the tank 75%
+    glRotatef(g.tank2.angle, 0.0f, 0.0f, 1.0f);  // Rotate the cannon
     glBegin(GL_QUADS);
     glVertex2f(15.0f, -7.5f);
     glVertex2f(15.0f, 7.5f);
@@ -224,7 +262,181 @@ void renderTanks() {
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void rainbow_ship(float *color) {
+void renderBoxes() 
+{
+    // draw boxes
+    for (int i = 0; i <= 1; i++) {      // i = num of boxes
+        for (int j = 0; j <= 1; j++) {  // j = box positions
+            glPushMatrix();
+            glColor3ubv(box[i].color);
+            glTranslatef(box[i].pos[j], box[i].pos[j + 1], 0.0f);
+            glBegin(GL_QUADS);
+            glVertex2f(-box[i].w, -box[i].h);
+            glVertex2f(-box[i].w, box[i].h);
+            glVertex2f(box[i].w, box[i].h);
+            glVertex2f(box[i].w, -box[i].h);
+            glEnd();
+            glPopMatrix();
+            j++;
+        }
+    }
+}
+
+void renderExplosion() 
+{
+    double positionx = 0;
+    double positiony = 0;
+    // get position of explosion
+    if (tankHit && currentPlayer % 2 == 0) {
+        positionx = g.tank.pos[0];
+        positiony = g.tank.pos[1];
+    }
+    if (tankHit && currentPlayer % 2 != 0) {
+        positionx = g.tank2.pos[0];
+        positiony = g.tank2.pos[1];
+    }
+    // if (boxHit) {
+    //     positionx = bx;
+    //     positiony = by;
+    // }
+    struct timespec bt;
+    clock_gettime(CLOCK_REALTIME, &bt);
+    double ts = timeDiff(&g.bulletTimer, &bt);
+    glBegin(GL_TRIANGLE_FAN);
+    glColor3f(1.0f, 0.5f + rnd() * 0.5f, 0.0f);
+    glVertex2f(positionx, positiony);
+    int numVertices = 16;
+    float radius = 20.0f;
+    for (int i = 0; i <= numVertices; i++) {
+        float angle = i * (2 * M_PI / numVertices);
+        float x = cos(angle) * radius * (0.7f + rnd() * 0.3f);
+        float y = sin(angle) * radius * (0.7f + rnd() * 0.3f);
+        glVertex2f(positionx + x, positiony + y);
+    }
+    if (ts > 2.8) {
+        tankHit = false;
+    }
+    glEnd();
+    // prevent background color bleed
+    glColor3f(1.0f, 1.0f, 1.0f);
+}
+
+void checkBoxCollison(Bullet *b, int i) 
+{
+    if (b->pos[0] > box[0].pos[0] - box[0].w / 2 &&
+        b->pos[0] < box[0].pos[0] + box[0].w / 2 &&
+        b->pos[1] > box[0].pos[1] - box[0].h / 2 &&
+        b->pos[1] < box[0].pos[1] + box[0].h / 2) {
+        bx = b->pos[0];
+        by = b->pos[1];
+        boxHit = true;
+        memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
+               sizeof(Bullet));
+        g.nbullets--;
+        // damageBox(b);
+    }
+}
+/*
+void damageBox(Bullet *b) 
+{
+    if (boxHit) {
+        printf("Box hit");
+    }
+}
+*/
+void renderText() 
+{
+    Rect r;
+    if (!gameOver()) {
+        r.bot = gl.yres - 20;
+        r.left = (gl.xres / 2) - 50;
+        r.center = 1;
+        ggprint8b(&r, 16, 0x00ffff00, "Artillery");
+        ggprint8b(&r, 16, 0x00ffffff, "Tab to view controls");
+        ggprint8b(&r, 16, 0x00ffff00, "Round : %d", game.getRoundsPlayed());
+        // check for gameOver
+        if (game.getGameStatus()) {
+        }
+        if (showControls) {
+            ggprint8b(&r, 16, 0x00ffffff, 
+                "a/d to move tank");
+            ggprint8b(&r, 16, 0x00ffffff, 
+                "Space to shoot Cannon");
+            ggprint8b(&r, 16, 0x00ffffff, 
+                "L/R arrow to adjust cannon angle");
+            ggprint8b(&r, 16, 0x00ffffff, 
+                "Up/Down arrow to adjust cannon power");
+        }
+        //  display player stats
+        r.bot = gl.yres - 20;
+        r.left = 10;
+        r.center = 0;
+        ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
+            game.getPlayer1Wins());
+        ggprint8b(&r, 16, 0xff00ff00, "Player1 Health: %.1f", 
+            playerTank.getHealth());
+        ggprint8b(&r, 16, 0x00ffff00, "Player1 Fuel: %.1f", 
+            playerTank.getFuel());
+        ggprint8b(&r, 16, 0x00ffff00, "Player1 Bullets: %d", 
+            playerTank.getBullets());
+        // min of 4 max of 16
+        double power = (cannonVelocity1 - 4.0) / (16 - 4) * 100;
+        ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power);  
+        ggprint8b(&r, 16, 0x00ffff00, 
+            "press 1, 2, 3, 4, or 5 for feature modes");
+        ggprint8b(&r, 16, 0x00ffff00, "f for Fuel testing");
+        // display enemy stats
+        r.bot = gl.yres - 20;
+        r.top = r.bot + 100;
+        r.right = gl.xres - 10;
+        int textWidth = 120;
+        r.left = gl.xres - 10 - textWidth;  // Position text on the right side
+        ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
+            game.getPlayer2Wins());
+        ggprint8b(&r, 16, 0xff00ff00, "Player2 Health: %.1f", 
+            enemyTank.getHealth());
+        ggprint8b(&r, 16, 0x00ffff00, "Player2 Fuel: %.1f", 
+            enemyTank.getFuel());
+        ggprint8b(&r, 16, 0x00ffff00, "Player2 Bullets: %d", 
+            enemyTank.getBullets());
+        double power2 = (cannonVelocity2 - 4.0) / (16 - 4) * 100;
+        ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power2);  
+        //renderTanks();                                                
+    } else {
+        r.bot = gl.yres - 20;
+        r.left = (gl.xres / 2) - 50;
+        r.center = 1;
+        ggprint8b(&r, 16, 0x00ffff00, "GAME OVER");
+        if (playerTank.getHealth() > 0) {
+            ggprint8b(&r, 16, 0x00ffff00, "Player 1 Wins");
+            ggprint8b(&r, 16, 0x00ffff00, "y to Continue");
+            if (newRound) {
+                game.increasePlayer1Wins();
+                cannonVelocity1 = 10;
+                cannonVelocity2 = 10;
+                playerTank.reset();
+                enemyTank.reset();
+                newRound = false;
+            }
+        }
+        if (enemyTank.getHealth() > 0) {
+            ggprint8b(&r, 16, 0x00ffff00, "Player 2 Wins");
+            ggprint8b(&r, 16, 0x00ffff00, "y to Continue");
+            if (newRound) {
+                game.increasePlayer2Wins();
+                cannonVelocity1 = 10;
+                cannonVelocity2 = 10;
+                playerTank.reset();
+                enemyTank.reset();
+                newRound = false;
+            }
+        }
+        glColor3f(1.0f, 1.0f, 1.0f);
+    }
+}
+
+void rainbow_ship(float *color) 
+{
     color[0] -= 0.01;  // decrease red
     color[2] += 0.01;  // increase blue
     if (color[0] < 0.0)

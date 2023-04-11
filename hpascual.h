@@ -3,7 +3,7 @@
 #define _FEATUREMODE_
 #include "global.h"
 
-class hpascual{
+class hpascual {
     int count;
 };
 
@@ -12,10 +12,18 @@ extern void rainbow_ship(float *color);
 extern void renderTanks();
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
-extern void shootCannon(Ship *curr_tank);
 extern bool gameOver();
+extern void renderExp();
+extern void renderBoxes();
+extern void damageBox(Bullet *b);
+extern void renderExplosion();
+extern void renderControls();
+extern void moveTank(Tank *curr_Tank);
+extern void checkBoxCollison(Bullet *b, int i);
+extern void renderText();
+
 class TankStats {
-public:
+   public:
     TankStats();
 
     double getHealth() const;
@@ -27,7 +35,7 @@ public:
     void reset();
     bool getLoser() const;
 
-private:
+   private:
     double health;
     double fuel;
     int bullets;
@@ -35,7 +43,7 @@ private:
 };
 
 class GameStats {
-public:
+   public:
     GameStats();
 
     void increasePlayer1Wins();
@@ -45,16 +53,26 @@ public:
     int getRoundsPlayed() const;
     bool getGameStatus() const;
 
-private:
+   private:
     int player1Wins;
     int player2Wins;
     int roundsPlayed;
     bool gameOver;
 };
 
+class Box {
+public:
+    float w, h;
+    float pos[10];
+    float radius;
+    unsigned char color[3];
+    void set_color(unsigned char col[3]) {
+        memcpy(color, col, sizeof(unsigned char) * 3);
+    }
+    Box();
+    Box(int wid, int hgt, int x, int y);
+};
 
-
-//extern void moveTank(Ship *curr_tank, Tank *tanky, int player);
+// extern void moveTank(Tank *curr_tank, Tank *tanky, int player);
 
 #endif
-
