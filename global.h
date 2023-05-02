@@ -53,7 +53,6 @@ class Global {
     char tank2_keys[65536];
     GLuint background_texture;
     int feature_mode;
-    int switch_weapon;
     Global();
 };
 class Tank {
