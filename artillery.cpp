@@ -441,14 +441,6 @@ int check_keys(XEvent *e) {
             } else
                 gl.feature_mode = 4;
             break;
-        case XK_m:
-            if (shift) {
-                if (gl.switch_weapon > 0)
-                    gl.switch_weapon = 0;
-            } else
-                gl.switch_weapon = 10;
-            break;
-
         case XK_5:
             if (shift) {
                 if (gl.feature_mode > 0)
@@ -717,9 +709,5 @@ void render() {
         glVertex2f(b->pos[0] + 1.0f, b->pos[1] - 1.0f);
         glVertex2f(b->pos[0] + 1.0f, b->pos[1] + 1.0f);
         glEnd();
-    }
-    if (gl.switch_weapon == 10) {
-        extern void renderMissile();
-        renderMissile();
     }
 }
