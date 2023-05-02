@@ -51,21 +51,6 @@ void renderLand(float x)
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void renderMissile()
-{
-    for (int i = 0; i < g.nbullets; i++) {
-        Bullet *b = &g.barr[i];
-        // Log("draw bullet...\n");
-        glColor3f(1.0, 0.0, 0.0);
-        glBegin(GL_TRIANGLES);
-        glColor3f(0.8, 0.8, 0.8);
-        glVertex2f(b->pos[0] - 10.0f, b->pos[1] + 5.0f);
-        glVertex2f(b->pos[0] - 10.0f, b->pos[1] - 5.0f);
-        glVertex2f(b->pos[0] + 10.0f, b->pos[1]);
-        glEnd();
-    }
-}
-
 void green_ship(float *color) {
     color[0] -= 0.05; 
     color[2] -= 0.05; 
