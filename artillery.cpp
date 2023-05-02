@@ -52,6 +52,7 @@ GameStats game;        // track gamestats
 TankStats playerTank;  // track Tankstats
 TankStats enemyTank;
 Box box[10];
+
 Image img1("desert.jpg");
 
 int currentPlayer = 0;
@@ -65,7 +66,7 @@ bool newRound = false;
 bool tankHit = false;
 bool cannonFired = false;
 bool boxHit = false;
-
+extern void renderHill(float x);
 // the Classes - Global, Ship, Bullet, Asteroid, and Game
 // are now in the header file global.h
 
@@ -281,7 +282,6 @@ void init_opengl(void) {
     // Do this to allow fonts
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
-
     glGenTextures(1, &gl.background_texture);
     int w = img1.width;
     int h = img1.height;
@@ -410,7 +410,6 @@ int check_keys(XEvent *e) {
             } else
                 gl.feature_mode = 12;
             break;
-
         case XK_Escape:
             return 1;
         case XK_1:
@@ -442,6 +441,14 @@ int check_keys(XEvent *e) {
             } else
                 gl.feature_mode = 4;
             break;
+        case XK_m:
+            if (shift) {
+                if (gl.switch_weapon > 0)
+                    gl.switch_weapon = 0;
+            } else
+                gl.switch_weapon = 10;
+            break;
+
         case XK_5:
             if (shift) {
                 if (gl.feature_mode > 0)
@@ -522,7 +529,7 @@ void physics(Tank *curr_tank) {
         if (ts > 3.5) {
             // time to delete the bullet.
             memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
-                   sizeof(Bullet));
+                    sizeof(Bullet));
             g.nbullets--;
             // do not increment i.
             continue;
@@ -544,7 +551,7 @@ void physics(Tank *curr_tank) {
                 enemyTank.decreaseHealth(25);
             }
             memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
-                   sizeof(Bullet));
+                    sizeof(Bullet));
             g.nbullets--;
             std::cout << "Tank hit." << std::endl;
         }
@@ -554,13 +561,13 @@ void physics(Tank *curr_tank) {
     }
 
     //---------------------------------------------------
-
     // adjust cannon angle
     if ((currentPlayer % 2) == 0) {
         if (gl.tank_keys[XK_Left]) {
             curr_tank->angle += 4.0;
-            if (curr_tank->angle >= 180.0f)
+            if (curr_tank->angle >= 180.0f) {
                 curr_tank->angle = 180.0f;
+            }
         }
         if (gl.tank_keys[XK_Right]) {
             curr_tank->angle -= 4.0;
@@ -682,6 +689,11 @@ void render() {
         ggprint8b(&r, 16, 0x00ffff00, "Artillery");
         renderText();
     }
+    extern void renderLand(float x);
+    renderLand(400);
+    for (int j = 250; j < 800; j+=100) {
+        renderHill(j);
+    }
     renderBoxes();
     renderTanks();
     if (tankHit) {
@@ -705,5 +717,9 @@ void render() {
         glVertex2f(b->pos[0] + 1.0f, b->pos[1] - 1.0f);
         glVertex2f(b->pos[0] + 1.0f, b->pos[1] + 1.0f);
         glEnd();
+    }
+    if (gl.switch_weapon == 10) {
+        extern void renderMissile();
+        renderMissile();
     }
 }

@@ -28,10 +28,18 @@ void Tank::setPosition(Vec position) {
 }
 
 Bullet::Bullet() {}
-
 Asteroid::Asteroid() {
     prev = NULL;
     next = NULL;
+}
+
+Hill::Hill() {
+    pos[0] = (Flt)(gl.xres / 8);
+    pos[1] = (Flt)(gl.yres / 8);
+    pos[2] = 0.0f;
+    angle = 0.0;
+    radius = 30;
+    color[0] = color[1] = color[2] = 1.0;
 }
 
 Game::Game() {

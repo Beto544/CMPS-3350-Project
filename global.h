@@ -53,9 +53,9 @@ class Global {
     char tank2_keys[65536];
     GLuint background_texture;
     int feature_mode;
+    int switch_weapon;
     Global();
 };
-
 class Tank {
    public:
     Vec pos;
@@ -71,6 +71,15 @@ class Tank {
     void setPosition(Vec position);
 };
 
+class Hill {
+    public:
+        Vec pos;
+        Flt radius;
+        float angle;
+        float color[3];
+    public:
+        Hill();
+};
 class Bullet {
    public:
     Vec pos;
@@ -104,6 +113,7 @@ class Game {
    public:
     Tank tank;
     Tank tank2;
+    Hill hill;
     Vec tank2_pos;
     Asteroid* ahead;
     Bullet* barr;
