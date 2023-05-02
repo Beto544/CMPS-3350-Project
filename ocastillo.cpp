@@ -3,6 +3,7 @@
 #include <ctime>
 #include "global.h"
 extern Bullet *b;
+
 void renderHill(float x)
 {
     g.hill.color[0] = 150.0/255;
@@ -10,18 +11,26 @@ void renderHill(float x)
     g.hill.color[2] = 0;
     glColor3fv(g.hill.color);
     glPushMatrix();
-    glTranslatef(g.hill.pos[0]+x, g.hill.pos[1], g.hill.pos[2]);
-    glScalef(2.0f, 2.0f, 2.0f);
+    glTranslatef(g.hill.pos[0]+x, g.hill.pos[1] + 100, g.hill.pos[2]);
+    glScalef(4.0f, 4.0f, 4.0f);
     glRotatef(g.hill.angle, 0.0f, 0.0f, 0.0f);
     glBegin(GL_POLYGON);
+    glShadeModel(GL_SMOOTH);
     glVertex2f(-40.0f, -50.0f);
-    glVertex2f(40.0f, 50.0f);
+    glVertex2f(-20.0f, -70.0f);
+    glVertex2f(0.0f, -80.0f);
+    glVertex2f(20.0f, -70.0f);
     glVertex2f(40.0f, -50.0f);
-    glVertex2f(-40.0f, 50.0f);
+    glVertex2f(30.0f, -30.0f);
+    glVertex2f(20.0f, -10.0f);
+    glVertex2f(0.0f, 0.0f);
+    glVertex2f(-20.0f, -10.0f);
+    glVertex2f(-30.0f, -30.0f);
     glEnd();
     glPopMatrix();
     glColor3f(1.0f, 1.0f, 1.0f);
 }
+
 void renderLand(float x) 
 {
     g.hill.color[0] = 150.0/255;
@@ -29,7 +38,7 @@ void renderLand(float x)
     g.hill.color[2] = 0;
     glColor3fv(g.hill.color);
     glPushMatrix();
-    glTranslatef(g.hill.pos[0]+x, g.hill.pos[1], g.hill.pos[2]);
+    glTranslatef(g.hill.pos[0]+x, g.hill.pos[1] + 5, g.hill.pos[2]);
     glScalef(1.0f, 1.0f, 1.0f);
     glRotatef(g.hill.angle, 0.0f, 0.0f, 0.0f);
     glBegin(GL_QUADS);
@@ -40,6 +49,21 @@ void renderLand(float x)
     glEnd();
     glPopMatrix();
     glColor3f(1.0f, 1.0f, 1.0f);
+}
+
+void renderMissile()
+{
+    for (int i = 0; i < g.nbullets; i++) {
+        Bullet *b = &g.barr[i];
+        // Log("draw bullet...\n");
+        glColor3f(1.0, 0.0, 0.0);
+        glBegin(GL_TRIANGLES);
+        glColor3f(0.8, 0.8, 0.8);
+        glVertex2f(b->pos[0] - 10.0f, b->pos[1] + 5.0f);
+        glVertex2f(b->pos[0] - 10.0f, b->pos[1] - 5.0f);
+        glVertex2f(b->pos[0] + 10.0f, b->pos[1]);
+        glEnd();
+    }
 }
 
 void green_ship(float *color) {
