@@ -6,6 +6,7 @@
 #include "global.h"
 
 extern int currentPlayer;
+extern int bot;
 extern float cannonVelocity1;
 extern float cannonVelocity2;
 extern bool tankHit;
@@ -13,10 +14,13 @@ extern bool cannonFired;
 extern bool boxHit;
 extern bool showControls;
 extern bool newRound;
+extern bool keyPressed;
+extern bool downPressed;
 extern Bullet *b;
 extern GameStats game;
 extern TankStats playerTank;
 extern TankStats enemyTank;
+extern void shootCannon(Tank *curr_tank);
 extern Box box[1];
 float bx;
 float by;
@@ -107,14 +111,16 @@ bool GameStats::getGameStatus() const
     return false;
 }
 
-Box::Box() 
+Box::Box()
 {
-    w = 0.0f;
-    h = 0.0f;
-    pos[0] = (gl.xres / 2) - 200;
-    pos[1] = (gl.yres / 4) - 55;
+    w = 800.0f;
+    h = 20.0f;
+    pos[0] = (gl.xres / 2);
+    pos[1] = (gl.yres / 4) - 160;
     radius = 50;
 }
+
+
 
 Box::Box(int wid, int hgt, int x, int y) 
 {
@@ -262,7 +268,7 @@ void renderTanks()
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void renderBoxes() 
+void renderBoxes()
 {
     // draw boxes
     for (int i = 0; i <= 1; i++) {      // i = num of boxes
@@ -281,6 +287,7 @@ void renderBoxes()
         }
     }
 }
+
 
 void renderExplosion() 
 {
@@ -321,15 +328,16 @@ void renderExplosion()
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void checkBoxCollison(Bullet *b, int i) 
+void checkBoxCollison(Bullet *b, int i)
 {
-    if (b->pos[0] > box[0].pos[0] - box[0].w / 2 &&
-        b->pos[0] < box[0].pos[0] + box[0].w / 2 &&
-        b->pos[1] > box[0].pos[1] - box[0].h / 2 &&
-        b->pos[1] < box[0].pos[1] + box[0].h / 2) {
+    if (b->pos[0] > box[0].pos[0] - box[0].w &&
+        b->pos[0] < box[0].pos[0] + box[0].w &&
+        b->pos[1] > box[0].pos[1] - box[0].h &&
+        b->pos[1] < box[0].pos[1] + box[0].h ) {
         bx = b->pos[0];
         by = b->pos[1];
         boxHit = true;
+        renderExplosion();
         memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
                sizeof(Bullet));
         g.nbullets--;
@@ -443,4 +451,94 @@ void rainbow_ship(float *color)
         color[0] = 1.0;  // max red value
     if (color[2] > 1.0)
         color[2] = 0.0;  // min blue value
+}
+
+void adjustCannon(Tank *curr_tank) {
+    // adjust cannon angle
+    if ((currentPlayer % 2) == 0) {
+        if (gl.tank_keys[XK_Left]) {
+            curr_tank->angle += 4.0;
+            if (curr_tank->angle >= 180.0f)
+                curr_tank->angle = 180.0f;
+        }
+        if (gl.tank_keys[XK_Right]) {
+            curr_tank->angle -= 4.0;
+            if (curr_tank->angle < 0.0f)
+                curr_tank->angle = 0.0f;
+        }  // adjust cannonVelocity
+        if (gl.tank_keys[XK_Up] && !keyPressed) {
+            cannonVelocity1 += .25;
+            if (cannonVelocity1 >= 18) {
+                cannonVelocity1 = 18.0;
+            }
+            keyPressed = true;
+        } else if (!gl.tank_keys[XK_Up]) {
+            keyPressed = false;
+        }
+        if (gl.tank_keys[XK_Down] && !downPressed) {
+            cannonVelocity1 -= .25;
+            if (cannonVelocity1 <= 4) {
+                cannonVelocity1 = 4.0;
+            }
+            downPressed = true;
+        } else if (!gl.tank_keys[XK_Down]) {
+            downPressed = false;
+        }
+    } else {
+        if (gl.tank2_keys[XK_Left]) {
+            curr_tank->angle += 4.0;
+            if (curr_tank->angle >= 180.0f)
+                curr_tank->angle = 180.0f;
+        }
+        if (gl.tank2_keys[XK_Right]) {
+            curr_tank->angle -= 4.0;
+            if (curr_tank->angle < 0.0f)
+                curr_tank->angle = 0.0f;
+        }
+        if (gl.tank2_keys[XK_Up] && !keyPressed) {
+            cannonVelocity2 += .5;
+            if (cannonVelocity2 >= 18) {
+                cannonVelocity2 = 18.0;
+            }
+            keyPressed = true;
+        } else if (!gl.tank2_keys[XK_Up]) {
+            keyPressed = false;
+        }
+        if (gl.tank2_keys[XK_Down] && !downPressed) {
+            cannonVelocity2 -= .5;
+            if (cannonVelocity2 <= 4) {
+                cannonVelocity2 = 4.0;
+            }
+            downPressed = true;
+        } else if (!gl.tank2_keys[XK_Down]) {
+            downPressed = false;
+        }
+    }
+}
+
+// bot
+void botCannon() {
+    int count = 0;
+    double error;
+    double threshold = 0.250;
+    double tank_pos = 0;
+    double cannon_landing_pos = 0;
+    error = tank_pos - cannon_landing_pos;
+    if (error > threshold) {
+        // lower
+    }
+    if (error < threshold) {
+        // increase
+    }
+    // bot should aim towards the position of tank1
+    // calc distance to tank, adjust velocity as needed
+    g.tank2.angle = 120.0;
+    if (enemyTank.getBullets() > 0 && !gameOver() && currentPlayer % 2 != 0 && bot) {
+        count++;
+        if (count <= 1) {
+            printf("Bot shot\n");
+            shootCannon(&g.tank2);
+        }
+        // shootCannon(&g.tank2);
+    }
 }

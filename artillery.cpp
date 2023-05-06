@@ -56,7 +56,7 @@ TankStats enemyTank;
 Box box[10];
 
 Image img1("desert.jpg");
-
+int bot = 0;
 int currentPlayer = 0;
 float cannonVelocity1 = 10;
 float cannonVelocity2 = 10;
@@ -209,6 +209,7 @@ class X11_wrapper {
 
 // function prototypes
 void init_opengl(void);
+extern void renderLand(float x);
 void check_mouse(XEvent *e, Tank *tank);
 int check_keys(XEvent *e);
 void physics(Tank *curr_tank);
@@ -566,66 +567,17 @@ void physics(Tank *curr_tank) {
 
     //---------------------------------------------------
     // adjust cannon angle
-    if ((currentPlayer % 2) == 0) {
-        if (gl.tank_keys[XK_Left]) {
-            curr_tank->angle += 4.0;
-            if (curr_tank->angle >= 180.0f) {
-                curr_tank->angle = 180.0f;
-            }
-        }
-        if (gl.tank_keys[XK_Right]) {
-            curr_tank->angle -= 4.0;
-            if (curr_tank->angle < 0.0f)
-                curr_tank->angle = 0.0f;
-        }
-        if (gl.tank_keys[XK_Up] && !keyPressed) {
-            cannonVelocity1 += .5;
-            if (cannonVelocity1 >= 16) {
-                cannonVelocity1 = 16.0;
-            }
-            keyPressed = true;
-        } else if (!gl.tank_keys[XK_Up]) {
-            keyPressed = false;
-        }
-        if (gl.tank_keys[XK_Down] && !downPressed) {
-            cannonVelocity1 -= .5;
-            if (cannonVelocity1 <= 4) {
-                cannonVelocity1 = 4.0;
-            }
-            downPressed = true;
-        } else if (!gl.tank_keys[XK_Down]) {
-            downPressed = false;
-        }
-    } else {
-        if (gl.tank2_keys[XK_Left]) {
-            curr_tank->angle += 4.0;
-            if (curr_tank->angle >= 180.0f)
-                curr_tank->angle = 180.0f;
-        }
-        if (gl.tank2_keys[XK_Right]) {
-            curr_tank->angle -= 4.0;
-            if (curr_tank->angle < 0.0f)
-                curr_tank->angle = 0.0f;
-        }
-        if (gl.tank2_keys[XK_Up] && !keyPressed) {
-            cannonVelocity2 += .5;
-            if (cannonVelocity2 >= 16) {
-                cannonVelocity2 = 16.0;
-            }
-            keyPressed = true;
-        } else if (!gl.tank2_keys[XK_Up]) {
-            keyPressed = false;
-        }
-        if (gl.tank2_keys[XK_Down] && !downPressed) {
-            cannonVelocity2 -= .5;
-            if (cannonVelocity2 <= 4) {
-                cannonVelocity2 = 4.0;
-            }
-            downPressed = true;
-        } else if (!gl.tank2_keys[XK_Down]) {
-            downPressed = false;
-        }
+     // adjust cannon angle and velocity
+    if (currentPlayer % 2 == 0) {
+        adjustCannon(curr_tank);
     }
+    if (!bot && currentPlayer % 2 != 0) {
+        adjustCannon(curr_tank);
+    }
+    if (bot && currentPlayer % 2 != 0) {
+        botCannon();
+    }
+
 
     // shoot cannon when space is pressed
     if (gl.tank_keys[XK_space] && currentPlayer % 2 == 0) {
@@ -682,9 +634,13 @@ void render() {
         r.bot = gl.yres - 30;
         r.left = gl.yres / 2;
         r.center = 0;
-        // Hunberto's feature mode
-        if (gl.feature_mode == 12) {
-        }
+    }
+    // Hunberto's feature mode
+    if (gl.feature_mode == 12) {
+        ggprint8b(&r, 16, 0x00ffffff, "Bot Testing");
+        bot = 1;
+    } else {
+        bot =0;
     }
 
     if (!gl.feature_mode) {
@@ -692,14 +648,13 @@ void render() {
         r.left = (gl.xres / 2) - 50;
         r.center = 1;
         ggprint8b(&r, 16, 0x00ffff00, "Artillery");
-        renderText();
     }
-    extern void renderLand(float x);
     renderLand(400);
     for (int j = 250; j < 800; j+=100) {
         renderHill(j);
     }
-    renderBoxes();
+    //renderBoxes();
+    renderText();
     renderTanks();
     if (tankHit) {
         renderExplosion();
