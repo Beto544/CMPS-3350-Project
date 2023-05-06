@@ -16,6 +16,8 @@
 #include <GL/glx.h>
 #include <X11/keysym.h>
 #include <time.h>
+#include </usr/include/AL/alut.h>
+
 
 // macros
 #define rnd() (((Flt)rand()) / (Flt)RAND_MAX)
@@ -53,6 +55,9 @@ class Global {
     char tank2_keys[65536];
     GLuint background_texture;
     int feature_mode;
+    ALuint alBufferDrip, alBufferTick, alBufferWin, alBufferBackground;
+    ALuint alSourceDrip, alSourceTick, alSourceWin, alSourceBackground;
+    
     Global();
 };
 class Tank {

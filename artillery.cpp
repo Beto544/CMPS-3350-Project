@@ -31,6 +31,8 @@
 #include "global.h"
 #include "hpascual.h"
 #include "log.h"
+#include "rvelasco.h"
+#include <GL/freeglut.h>
 // constants
 const float gravity = 9.8f;
 
@@ -216,6 +218,7 @@ void render();
 // M A I N
 //==========================================================================
 int main() {
+    playSound(gl.alSourceBackground); // Plays win Sound
     logOpen();
     init_opengl();
     srand(time(NULL));
@@ -223,10 +226,14 @@ int main() {
     clock_gettime(CLOCK_REALTIME, &timeStart);
     x11.set_mouse_position(100, 100);
     int done = 0;
+    initSound();
     while (!done) {
         while (x11.getXPending()) {
             XEvent e = x11.getXNextEvent();
             x11.check_resize(&e);
+            if(gameOver()){
+                playSound(gl.alSourceWin); // Plays win Sound
+            }
             if ((currentPlayer % 2) == 0) {
                 // player 1's turn
                 check_mouse(&e, &g.tank);
@@ -258,6 +265,7 @@ int main() {
     }
     cleanup_fonts();
     logClose();
+    cleanupSound();
     return 0;
 }
 
@@ -474,6 +482,7 @@ void shootCannon(Tank *curr_tank) {
     if (ts > 0.1) {
         timeCopy(&g.bulletTimer, &bt);
         if (g.nbullets < 1) {
+            playSound(gl.alSourceDrip); // Plays Cannon Sound
             //  shoot a bullet...
             Bullet *b = &g.barr[g.nbullets];
             timeCopy(&b->time, &bt);
@@ -536,6 +545,9 @@ void physics(Tank *curr_tank) {
         // check tank collision
         if (dist < (curr_tank->radius * curr_tank->radius)) {
             tankHit = true;
+            printf("Tank hit");
+            playSound(gl.alSourceTick); // Plays Cannon Sound
+            //  shoot a bullet...
             if (currentPlayer % 2 == 0) {
                 playerTank.decreaseHealth(25);
             }
@@ -649,6 +661,7 @@ void render() {
     glTexCoord2f(0, 0);
     glVertex2f(0, gl.yres);
     glEnd();
+    //display();
     Rect r;
     if (gl.feature_mode) {
         // render green border
