@@ -51,7 +51,6 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 Global gl;
 Game g;
-void shootCannon(Tank *curr_tank);
 GameStats game;        // track gamestats
 TankStats playerTank;  // track Tankstats
 TankStats enemyTank;
@@ -212,6 +211,7 @@ class X11_wrapper {
 // function prototypes
 void init_opengl(void);
 extern void renderLand(float x);
+void shootCannon(Tank *curr_tank);
 void check_mouse(XEvent *e, Tank *tank);
 int check_keys(XEvent *e);
 void physics(Tank *curr_tank);
@@ -463,6 +463,11 @@ int check_keys(XEvent *e) {
 		case XK_Tab:
 			showControls = !showControls;
 			break;
+		case XK_equal:
+			if(gl.feature_mode ==12) {
+				currentPlayer++;
+			}
+			break;
 		case XK_y:
 			newRound = true;
 			break;
@@ -546,7 +551,7 @@ void physics(Tank *curr_tank) {
 		d1 = b->pos[1] - curr_tank->pos[1];
 		dist = (d0 * d0 + d1 * d1);
 		// check tank collision
-		if (dist < (curr_tank->radius * curr_tank->radius)) {
+		if (dist < (curr_tank->radius * curr_tank->radius) ||tankHit) {
 			tankHit = true;
 			printf("Tank hit");
 			playSound(gl.alSourceTick); // Plays Cannon Sound
@@ -639,7 +644,8 @@ void render() {
 	}
 	// Hunberto's feature mode
 	if (gl.feature_mode == 12) {
-		ggprint8b(&r, 16, 0x00ffffff, "Bot Testing");
+		ggprint8b(&r, 16, 0x00ffffff, "Bot Demo");
+		//tankHit = true;
 		bot = 1;
 	} else {
 		bot =0;
@@ -658,19 +664,13 @@ void render() {
 	if (tankHit) {
 		renderExplosion();
 	}
-
-
+	if (boxHit) {
+		renderExplosion();
+	}
 	renderBars(1, playerTank.getHealth());
-
 	renderBars(2, enemyTank.getHealth());
-
 	renderCannonPower(cannonVelocity1, 1);
-
 	renderCannonPower(cannonVelocity2, 2);
-
-
-
-
 	//-------------------------------------------------------------------------
 	// Draw the bullets
 	// draw the bullets

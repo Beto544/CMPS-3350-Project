@@ -215,7 +215,7 @@ void renderTanks()
     glTranslatef(g.tank.pos[0], g.tank.pos[1], g.tank.pos[2]);
     glTranslatef(15.0f, 0.0f, 0.0f);  // Move to the position of the cannon
     glScalef(0.75f, 0.75f, 0.75f);    // scale the tank 75%
-    glRotatef(g.tank.angle, 0.0f, 0.0f, 1.0f);  // Rotate the cannon
+    glRotatef(g.tank.angle, 0.0f, 0, 1.0f);  // Rotate the cannon
     glBegin(GL_QUADS);
     glVertex2f(15.0f, -7.5f);
     glVertex2f(15.0f, 7.5f);
@@ -298,14 +298,13 @@ void renderExplosion()
         positionx = g.tank.pos[0];
         positiony = g.tank.pos[1];
     }
-    if (tankHit && currentPlayer % 2 != 0) {
+    else if (tankHit && currentPlayer % 2 != 0) {
         positionx = g.tank2.pos[0];
         positiony = g.tank2.pos[1];
+    } else if (boxHit) {
+        positionx = bx;
+        positiony = by;
     }
-    // if (boxHit) {
-    //     positionx = bx;
-    //     positiony = by;
-    // }
     struct timespec bt;
     clock_gettime(CLOCK_REALTIME, &bt);
     double ts = timeDiff(&g.bulletTimer, &bt);
@@ -322,6 +321,7 @@ void renderExplosion()
     }
     if (ts > 2.8) {
         tankHit = false;
+        boxHit = false;
     }
     glEnd();
     // prevent background color bleed
@@ -337,7 +337,7 @@ void checkBoxCollison(Bullet *b, int i)
         bx = b->pos[0];
         by = b->pos[1];
         boxHit = true;
-        renderExplosion();
+        printf("Floor hit");
         memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
                sizeof(Bullet));
         g.nbullets--;
@@ -379,20 +379,19 @@ void renderText()
         r.bot = gl.yres - 20;
         r.left = 10;
         r.center = 0;
-        ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
+        ggprint8b(&r, 16, 0x00ffff00, "  Wins: %d", 
             game.getPlayer1Wins());
-        //ggprint8b(&r, 16, 0xff00ff00, "Player1 Health: %.1f", 
-        //    playerTank.getHealth());
-        //ggprint8b(&r, 16, 0x00ffff00, "Player1 Fuel: %.1f", 
-        //    playerTank.getFuel());
-        ggprint8b(&r, 16, 0x00ffff00, "Player1 Bullets: %d", 
+        ggprint8b(&r, 16, 0x00ffff00, "  Player 1 Bullets: %d", 
             playerTank.getBullets());
-        // min of 4 max of 16
-        //double power = (cannonVelocity1 - 4.0) / (16 - 4) * 100;
-        //ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power);  
-        ggprint8b(&r, 16, 0x00ffff00, 
-            "press 1, 2, 3, 4, or 5 for feature modes");
-        ggprint8b(&r, 16, 0x00ffff00, "f for Bot testing");
+        ggprint8b(&r, 16, 0x00ffff00, "  Player 1 Fuel: %.2f", 
+            playerTank.getFuel());
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, "  Player 1 Health"); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 32, 0xFFFFA500, "  Cannon Power"); 
         // display enemy stats
         r.bot = gl.yres - 20;
         r.top = r.bot + 100;
@@ -401,15 +400,17 @@ void renderText()
         r.left = gl.xres - 10 - textWidth;  // Position text on the right side
         ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
             game.getPlayer2Wins());
-        //ggprint8b(&r, 16, 0xff00ff00, "Player2 Health: %.1f", 
-        //    enemyTank.getHealth());
-        //ggprint8b(&r, 16, 0x00ffff00, "Player2 Fuel: %.1f", 
-        //    enemyTank.getFuel());
-        ggprint8b(&r, 16, 0x00ffff00, "Player2 Bullets: %d", 
+        ggprint8b(&r, 16, 0x00ffff00, " Player 2 Bullets: %d", 
             enemyTank.getBullets());
-        //double power2 = (cannonVelocity2 - 4.0) / (16 - 4) * 100;
-        //ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power2);  
-        //renderTanks();                                                
+        ggprint8b(&r, 16, 0x00ffff00, " Player 2 Fuel: %.2f", 
+            enemyTank.getFuel());
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, "  Player 2 Health"); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 16, 0xff00ff00, ""); 
+        ggprint8b(&r, 32, 0xFFFFA500, "  Cannon Power");                                                
     } else {
         r.bot = gl.yres - 20;
         r.left = (gl.xres / 2) - 50;
@@ -453,7 +454,8 @@ void rainbow_ship(float *color)
         color[2] = 0.0;  // min blue value
 }
 
-void adjustCannon(Tank *curr_tank) {
+void adjustCannon(Tank *curr_tank) 
+{
     // adjust cannon angle
     if ((currentPlayer % 2) == 0) {
         if (gl.tank_keys[XK_Left]) {
@@ -517,7 +519,8 @@ void adjustCannon(Tank *curr_tank) {
 }
 
 // bot
-void botCannon() {
+void botCannon() 
+{
     int count = 0;
     double error;
     double threshold = 0.250;
@@ -531,7 +534,7 @@ void botCannon() {
         // increase
     }
     // bot should aim towards the position of tank1
-    // calc distance to tank, adjust velocity as needed
+    // calc distance to tank, adjust velocity, as needed
     g.tank2.angle = 120.0;
     if (enemyTank.getBullets() > 0 && !gameOver() && currentPlayer % 2 != 0 && bot) {
         count++;
