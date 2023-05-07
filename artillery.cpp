@@ -661,21 +661,20 @@ void render() {
     }
     //-------------------------------------------------------------------------
     // Draw the bullets
+      // draw the bullets
     for (int i = 0; i < g.nbullets; i++) {
         Bullet *b = &g.barr[i];
-        // Log("draw bullet...\n");
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_POINTS);
-        glVertex2f(b->pos[0], b->pos[1]);
-        glVertex2f(b->pos[0] - 1.0f, b->pos[1]);
-        glVertex2f(b->pos[0] + 1.0f, b->pos[1]);
-        glVertex2f(b->pos[0], b->pos[1] - 1.0f);
-        glVertex2f(b->pos[0], b->pos[1] + 1.0f);
-        glColor3f(0.8, 0.8, 0.8);
-        glVertex2f(b->pos[0] - 1.0f, b->pos[1] - 1.0f);
-        glVertex2f(b->pos[0] - 1.0f, b->pos[1] + 1.0f);
-        glVertex2f(b->pos[0] + 1.0f, b->pos[1] - 1.0f);
-        glVertex2f(b->pos[0] + 1.0f, b->pos[1] + 1.0f);
+        float radius = 4.0f;
+        glColor3f(0.9, 0.9, 0.9);
+        //unsigned char col[3] = {0, 0, 0};
+        //b->set_color(col);
+        glBegin(GL_POLYGON);
+        for (int j = 0; j < 20; j++) {
+            float theta = 2.0f * 3.1415926f * (float)j / 20.0;
+            float x = radius * cosf(theta);
+            float y = radius * sinf(theta);
+            glVertex2f(b->pos[0] + x, b->pos[1] + y);
+        }
         glEnd();
     }
 }
