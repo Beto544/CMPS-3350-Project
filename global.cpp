@@ -4,8 +4,8 @@
 #include <cstring>
 
 Global::Global() {
-    xres = 1200;
-    yres = 780;
+    xres = 1320;
+    yres = 858;
     std::memset(tank_keys, 0, 65536);
     std::memset(tank2_keys, 0, 65536);
 }
