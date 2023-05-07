@@ -114,10 +114,10 @@ bool GameStats::getGameStatus() const
 Box::Box()
 {
     w = 800.0f;
-    h = 20.0f;
+    h = 10.0f;
     pos[0] = (gl.xres / 2);
     pos[1] = (gl.yres / 4) - 160;
-    radius = 50;
+    radius = 20;
 }
 
 
@@ -381,18 +381,18 @@ void renderText()
         r.center = 0;
         ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
             game.getPlayer1Wins());
-        ggprint8b(&r, 16, 0xff00ff00, "Player1 Health: %.1f", 
-            playerTank.getHealth());
-        ggprint8b(&r, 16, 0x00ffff00, "Player1 Fuel: %.1f", 
-            playerTank.getFuel());
+        //ggprint8b(&r, 16, 0xff00ff00, "Player1 Health: %.1f", 
+        //    playerTank.getHealth());
+        //ggprint8b(&r, 16, 0x00ffff00, "Player1 Fuel: %.1f", 
+        //    playerTank.getFuel());
         ggprint8b(&r, 16, 0x00ffff00, "Player1 Bullets: %d", 
             playerTank.getBullets());
         // min of 4 max of 16
-        double power = (cannonVelocity1 - 4.0) / (16 - 4) * 100;
-        ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power);  
+        //double power = (cannonVelocity1 - 4.0) / (16 - 4) * 100;
+        //ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power);  
         ggprint8b(&r, 16, 0x00ffff00, 
             "press 1, 2, 3, 4, or 5 for feature modes");
-        ggprint8b(&r, 16, 0x00ffff00, "f for Fuel testing");
+        ggprint8b(&r, 16, 0x00ffff00, "f for Bot testing");
         // display enemy stats
         r.bot = gl.yres - 20;
         r.top = r.bot + 100;
@@ -401,14 +401,14 @@ void renderText()
         r.left = gl.xres - 10 - textWidth;  // Position text on the right side
         ggprint8b(&r, 16, 0x00ffff00, "Wins: %d", 
             game.getPlayer2Wins());
-        ggprint8b(&r, 16, 0xff00ff00, "Player2 Health: %.1f", 
-            enemyTank.getHealth());
-        ggprint8b(&r, 16, 0x00ffff00, "Player2 Fuel: %.1f", 
-            enemyTank.getFuel());
+        //ggprint8b(&r, 16, 0xff00ff00, "Player2 Health: %.1f", 
+        //    enemyTank.getHealth());
+        //ggprint8b(&r, 16, 0x00ffff00, "Player2 Fuel: %.1f", 
+        //    enemyTank.getFuel());
         ggprint8b(&r, 16, 0x00ffff00, "Player2 Bullets: %d", 
             enemyTank.getBullets());
-        double power2 = (cannonVelocity2 - 4.0) / (16 - 4) * 100;
-        ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power2);  
+        //double power2 = (cannonVelocity2 - 4.0) / (16 - 4) * 100;
+        //ggprint8b(&r, 16, 0x00ff0000, "Cannon Power: %.2f", power2);  
         //renderTanks();                                                
     } else {
         r.bot = gl.yres - 20;
