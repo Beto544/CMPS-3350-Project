@@ -70,7 +70,7 @@ bool newRound = false;
 bool tankHit = false;
 bool cannonFired = false;
 bool boxHit = false;
-extern void renderHill(float x);
+extern void drawHills();
 // the Classes - Global, Ship, Bullet, Asteroid, and Game
 // are now in the header file global.h
 
@@ -651,11 +651,8 @@ void render() {
 		r.center = 1;
 		ggprint8b(&r, 16, 0x00ffff00, "Artillery");
 	}
-	renderLand(400);
-	for (int j = 250; j < 800; j+=100) {
-		renderHill(j);
-	}
-	//renderBoxes();
+	drawHills();
+    //renderBoxes();
 	renderText();
 	renderTanks();
 	if (tankHit) {
