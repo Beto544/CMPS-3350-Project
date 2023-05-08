@@ -1,40 +1,24 @@
 // Stephanie Esquivel
 
 #include "sesquivel.h"
-
 #include "global.h"
 #include "hpascual.h"
 
 
-SE::SE() 
-{
-    gamestart = time(NULL);
-    timestart = time(NULL);
-    play = 0;
-    buttons = 0;
-};
 
-void renderBars(int player, double stat)
-
-{
+void renderBars(int player, double stat) {
     float barPercentage = stat / 100;
-
     float barX;
-
     float barY;
-
     float barWidth = 100.0f;
-
     float barHeight = 10.0f;
 
     if (player == 1) {
         barX = gl.xres / 2 - 640;
-
         barY = gl.yres / 2 + 320;
 
     } else {
         barX = gl.xres / 2 + 540;
-
         barY = gl.yres / 2 + 320;
     }
 
@@ -47,21 +31,13 @@ void renderBars(int player, double stat)
     // Draw the health bar rectangle
 
     glPushMatrix();
-
     glTranslatef(barX, barY, 0.0f);
-
     glBegin(GL_QUADS);
-
     glVertex2f(0.0f, 0.0f);
-
     glVertex2f(renderBarWidth, 0.0f);
-
     glVertex2f(renderBarWidth, barHeight);
-
     glVertex2f(0.0f, barHeight);
-
     glEnd();
-
     glPopMatrix();
 
     // Reset the color to white
@@ -69,27 +45,19 @@ void renderBars(int player, double stat)
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void renderCannonPower(float cannonVelocity, int player)
-
-{
+void renderCannonPower(float cannonVelocity, int player) {
     float cannonPower = (cannonVelocity - 4.0) / (15 - 4);
-
     float barX;
-
     float barY;
-
     float barWidth = 100.0f;
-
     float barHeight = 10.0f;
 
     if (player == 1) {
         barX = gl.xres / 2 - 640;
-
         barY = gl.yres / 2 + 250;
 
     } else {
         barX = gl.xres / 2 + 580;
-
         barY = gl.yres / 2 + 250;
     }
 
