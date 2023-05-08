@@ -335,7 +335,6 @@ void checkBoxCollison(Bullet *b, int i)
         bx = b->pos[0];
         by = b->pos[1];
         boxHit = true;
-        printf("Floor hit");
         memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
                sizeof(Bullet));
         g.nbullets--;

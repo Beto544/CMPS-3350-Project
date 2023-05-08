@@ -52,8 +52,7 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 Global gl;
 Game g;
 GameStats game;        // track gamestats
-TankStats playerTank;  // track Tankstats
-TankStats enemyTank;
+TankStats playerTank, enemyTank;
 Box box[10];
 
 Image img1("desert.jpg");
@@ -544,7 +543,7 @@ void physics(Tank *curr_tank) {
 		d1 = b->pos[1] - curr_tank->pos[1];
 		dist = (d0 * d0 + d1 * d1);
 		// check tank collision
-		if (dist < (curr_tank->radius * curr_tank->radius) ||tankHit) {
+		if (dist < (curr_tank->radius * curr_tank->radius)) {
 			tankHit = true;
 			printf("Tank hit");
 			playSound(gl.alSourceTick); // Plays Cannon Sound
@@ -644,7 +643,7 @@ void render() {
 		r.bot = gl.yres - 20;
 		r.left = (gl.xres / 2) - 50;
 		r.center = 1;
-		ggprint8b(&r, 16, 0x00ffff00, "Artillery");
+		ggprint8b(&r, 16, 0x00ffff00, "");
 	}
 	drawHills();
 	if (toggle) {
