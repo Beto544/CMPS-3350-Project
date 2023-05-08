@@ -16,9 +16,26 @@ public:
     }
     Terrain();
     Terrain(int wid, int hgt, int x, int y);
-} terrain[3];
+} terrain[1];
 
-float tx, ty;
+extern float bx, by;
+
+Terrain::Terrain() 
+{
+    w = 300.0f;
+    h = 150.0f;
+    pos[0] = (gl.xres/2) + 40;
+    pos[1] = (gl.yres/4) - 160;
+    radius = 20;
+}
+
+Terrain::Terrain(int wid, int hgt, int x, int y) 
+{
+    w = wid;
+    h = hgt;
+    pos[0] = x;
+    pos[1] = y;
+}
 
 void renderHill(float x)
 {
@@ -46,6 +63,7 @@ void renderHill(float x)
     glPopMatrix();
     glColor3f(1.0f, 1.0f, 1.0f);
 }
+
 void renderLand(float x) 
 {
     g.hill.color[0] = 150.0/255;
@@ -57,7 +75,7 @@ void renderLand(float x)
     glScalef(1.0f, 1.0f, 1.0f);
     glRotatef(g.hill.angle, 0.0f, 0.0f, 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(10.0f, -100.0f);
+    glVertex2f(-10.0f, -100.0f);
     glVertex2f(-10.0f, 100.0f);
     glVertex2f(10.0f, 100.0f);
     glVertex2f(10.0f, -100.0f);
@@ -66,41 +84,18 @@ void renderLand(float x)
     glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-Terrain::Terrain() 
-{
-    w = 0.0f;
-    h = 0.0f;
-    pos[0] = (gl.xres/2) - 200;
-    pos[1] = (gl.yres/4) - 55;
-    radius = 50;
-}
-
-Terrain::Terrain(int wid, int hgt, int x, int y) 
-{
-    w = wid;
-    h = hgt;
-    pos[0] = x;
-    pos[1] = y;
-}
-
 void renderTerrain()
 {   
-    for (int i = 0; i < 3; i++) {
-        for (int j = 300; j < 800; j+= 200) {
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
             glPushMatrix();
             glColor3ubv(terrain[i].color);
-            glTranslatef(terrain[i].pos[j], terrain[i].pos[j + 100], 0.0f);
-            glBegin(GL_POLYGON);
+            glTranslatef(terrain[i].pos[j], terrain[i].pos[j + 1], 0.0f);
+            glBegin(GL_QUADS);
             glVertex2f(-terrain[i].w, -terrain[i].h);
-            glVertex2f(-terrain[i].w, -terrain[i].h);
-            glVertex2f(terrain[i].w, -terrain[i].h);
-            glVertex2f(terrain[i].w, -terrain[i].h);
-            glVertex2f(terrain[i].w, -terrain[i].h);
-            glVertex2f(terrain[i].w, -terrain[i].h);
-            glVertex2f(terrain[i].w, -terrain[i].h);
+            glVertex2f(-terrain[i].w, terrain[i].h);
             glVertex2f(terrain[i].w, terrain[i].h);
-            glVertex2f(-terrain[i].w, -terrain[i].h);
-            glVertex2f(-terrain[i].w, -terrain[i].h);
+            glVertex2f(terrain[i].w, -terrain[i].h);
             glEnd();
             glPopMatrix();
             j++;
@@ -110,21 +105,19 @@ void renderTerrain()
 
 void checkCollison(Bullet *b, int i)
 {
-    for (int j = 0; j < 3; j++) {
-        if (b->pos[0] > terrain[j].pos[0] - terrain[j].w / 2 - 4.0f &&
-                b->pos[0] < terrain[j].pos[0] + terrain[j].w / 2 + 4.0f &&
-                b->pos[1] > terrain[j].pos[1] - terrain[j].h / 2 - 4.0f &&
-                b->pos[1] < terrain[j].pos[1] + terrain[j].h / 2 + 4.0f) {
-            boxHit = true;
-            tx = b->pos[0];
-            ty = b->pos[1];
-            memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
-                    sizeof(Bullet));
-            g.nbullets--;
-            // damageBox(b);
-        }
+    if (b->pos[0] > terrain[0].pos[0] - terrain[0].w &&
+            b->pos[0] < terrain[0].pos[0] + terrain[0].w &&
+            b->pos[1] > terrain[0].pos[1] - terrain[0].h &&
+            b->pos[1] < terrain[0].pos[1] + terrain[0].h ) {
+        bx = b->pos[0];
+        by = b->pos[1];
+        boxHit = true;
+        memcpy(&g.barr[i], &g.barr[g.nbullets - 1],
+                sizeof(Bullet));
+        g.nbullets--;
     }
 }
+
 void drawHills()
 {
     for (float j = 325; j < 800; j+=200) {
@@ -132,6 +125,7 @@ void drawHills()
         renderLand(j);
     }
 }
+
 void renderMissile()
 {
     for (int i = 0; i < g.nbullets; i++) {
