@@ -4,30 +4,15 @@
 
 #include "global.h"
 #include "hpascual.h"
-#define MAXBUTTONS 10
 
-Button button[MAXBUTTONS];
-struct SE {
-    int gamestart;
-    int reset;
-    int gameover;
-    int timestart;
-    int seconds;
-    int min;
-    int tmp;
-    int pause;
-    int xres;
-    int yres;
-    unsigned int play;
-    Button button[MAXBUTTONS];
-    int buttons;
-    SE() {
-        gamestart = time(NULL);
-        timestart = time(NULL);
-        play = 0;
-        int buttons = 0;
-    }
-} s;
+
+SE::SE() 
+{
+    gamestart = time(NULL);
+    timestart = time(NULL);
+    play = 0;
+    buttons = 0;
+};
 
 void renderBars(int player, double stat)
 
