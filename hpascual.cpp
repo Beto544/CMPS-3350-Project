@@ -10,7 +10,6 @@ extern int bot;
 extern float cannonVelocity1;
 extern float cannonVelocity2;
 extern bool tankHit;
-extern bool cannonFired;
 extern bool boxHit;
 extern bool showControls;
 extern bool newRound;
@@ -20,10 +19,13 @@ extern Bullet *b;
 extern GameStats game;
 extern TankStats playerTank;
 extern TankStats enemyTank;
-extern void shootCannon(Tank *curr_tank);
+extern void shootCannon(Tank *curr_tank,float cannonVelocity);
 extern Box box[1];
 float bx;
 float by;
+bool toggle = false;
+
+
 
 TankStats::TankStats()
     : health(100), fuel(100), bullets(20), loser(false) 
@@ -106,10 +108,6 @@ int GameStats::getRoundsPlayed() const
     return roundsPlayed;
 }
 
-bool GameStats::getGameStatus() const 
-{
-    return false;
-}
 
 Box::Box()
 {
@@ -362,9 +360,6 @@ void renderText()
         ggprint8b(&r, 16, 0x00ffff00, "Artillery");
         ggprint8b(&r, 16, 0x00ffffff, "Tab to view controls");
         ggprint8b(&r, 16, 0x00ffff00, "Round : %d", game.getRoundsPlayed());
-        // check for gameOver
-        if (game.getGameStatus()) {
-        }
         if (showControls) {
             ggprint8b(&r, 16, 0x00ffffff, 
                 "a/d to move tank");
@@ -540,7 +535,7 @@ void botCannon()
         count++;
         if (count <= 1) {
             printf("Bot shot\n");
-            shootCannon(&g.tank2);
+            shootCannon(&g.tank2,cannonVelocity2);
         }
         // shootCannon(&g.tank2);
     }

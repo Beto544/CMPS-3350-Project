@@ -57,6 +57,8 @@ TankStats enemyTank;
 Box box[10];
 
 Image img1("desert.jpg");
+
+
 int bot = 0;
 int currentPlayer = 0;
 float cannonVelocity1 = 10;
@@ -211,7 +213,7 @@ class X11_wrapper {
 // function prototypes
 void init_opengl(void);
 extern void renderLand(float x);
-void shootCannon(Tank *curr_tank);
+void shootCannon(Tank *curr_tank, float cannonVelocity);
 void check_mouse(XEvent *e, Tank *tank);
 int check_keys(XEvent *e);
 void physics(Tank *curr_tank);
@@ -322,7 +324,6 @@ void check_mouse(XEvent *e, Tank *curr_tank) {
 	static int savey = 0;
 	//
 	static int ct = 0;
-	// std::cout << "m" << std::endl << std::flush;
 	if (e->type == ButtonRelease) {
 		return;
 	}
@@ -334,23 +335,17 @@ void check_mouse(XEvent *e, Tank *curr_tank) {
 			// Right button is down
 		}
 	}
-	// keys[XK_Up] = 0;
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		// Mouse moved
 		int xdiff = savex - e->xbutton.x;
 		int ydiff = savey - e->xbutton.y;
 		if (++ct < 10)
 			return;
-		// std::cout << "savex: " << savex << std::endl << std::flush;
-		// std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
-		// std::flush;
 		if (xdiff > 0) {
-			// std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			curr_tank->angle += 0.05f * (float)xdiff;
 			if (curr_tank->angle >= 180.0f)
 				curr_tank->angle = 180.0f;
 		} else if (xdiff < 0) {
-			// std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			curr_tank->angle += 0.05f * (float)xdiff;
 			if (curr_tank->angle < 0.0f)
 				curr_tank->angle = 0.0f;
@@ -473,17 +468,15 @@ int check_keys(XEvent *e) {
 			break;
 		case XK_minus:
 			break;
+		case XK_t:
+			toggle = !toggle;
+			break;
 	}
 	return 0;
 }
 
-void shootCannon(Tank *curr_tank) {
-	float cannonVelocity = 0;
-	if (currentPlayer % 2 == 0) {
-		cannonVelocity = cannonVelocity1;
-	} else {
-		cannonVelocity = cannonVelocity2;
-	}
+void shootCannon(Tank *curr_tank,float cannonVelocity) 
+{	
 	struct timespec bt;
 	clock_gettime(CLOCK_REALTIME, &bt);
 	double ts = timeDiff(&g.bulletTimer, &bt);
@@ -573,7 +566,6 @@ void physics(Tank *curr_tank) {
 	}
 
 	//---------------------------------------------------
-	// adjust cannon angle
 	// adjust cannon angle and velocity
 	if (currentPlayer % 2 == 0) {
 		adjustCannon(curr_tank);
@@ -584,18 +576,15 @@ void physics(Tank *curr_tank) {
 	if (bot && currentPlayer % 2 != 0) {
 		botCannon();
 	}
-
-
 	// shoot cannon when space is pressed
 	if (gl.tank_keys[XK_space] && currentPlayer % 2 == 0) {
 		if (playerTank.getBullets() > 0 && !gameOver()) {
-			cannonFired = true;
-			shootCannon(&g.tank);
+			shootCannon(&g.tank,cannonVelocity1);
 		}
 	}
 	if (gl.tank2_keys[XK_space] && currentPlayer % 2 != 0) {
 		if (enemyTank.getBullets() > 0 && !gameOver()) {
-			shootCannon(&g.tank2);
+			shootCannon(&g.tank2,cannonVelocity2);
 		}
 	}
 }
@@ -658,7 +647,9 @@ void render() {
 		ggprint8b(&r, 16, 0x00ffff00, "Artillery");
 	}
 	drawHills();
-    //renderBoxes();
+	if (toggle) {
+    	renderBoxes();
+	}
 	renderText();
 	renderTanks();
 	if (tankHit) {

@@ -2,6 +2,7 @@
 #ifndef _FEATUREMODE_
 #define _FEATUREMODE_
 #include "global.h"
+#include "fonts.h"
 
 class hpascual {
     int count;
@@ -23,6 +24,7 @@ extern void checkBoxCollison(Bullet *b, int i);
 extern void renderText();
 extern void adjustCannon(Tank *curr_tank);
 extern void botCannon();
+extern bool toggle;
 
 class TankStats {
    public:
