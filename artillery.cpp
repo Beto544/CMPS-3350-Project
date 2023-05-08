@@ -52,7 +52,8 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 Global gl;
 Game g;
 GameStats game;        // track gamestats
-TankStats playerTank, enemyTank;
+TankStats playerTank;  // track Tankstats
+TankStats enemyTank;
 Box box[10];
 
 Image img1("desert.jpg");
@@ -70,7 +71,6 @@ bool newRound = false;
 bool tankHit = false;
 bool cannonFired = false;
 bool boxHit = false;
-extern void drawHills();
 // the Classes - Global, Ship, Bullet, Asteroid, and Game
 // are now in the header file global.h
 
@@ -211,7 +211,8 @@ class X11_wrapper {
 
 // function prototypes
 void init_opengl(void);
-extern void renderLand(float x);
+extern void drawHills();
+extern void renderMissile();
 void shootCannon(Tank *curr_tank, float cannonVelocity);
 void check_mouse(XEvent *e, Tank *tank);
 int check_keys(XEvent *e);
@@ -543,7 +544,7 @@ void physics(Tank *curr_tank) {
 		d1 = b->pos[1] - curr_tank->pos[1];
 		dist = (d0 * d0 + d1 * d1);
 		// check tank collision
-		if (dist < (curr_tank->radius * curr_tank->radius)) {
+		if (dist < (curr_tank->radius * curr_tank->radius) ||tankHit) {
 			tankHit = true;
 			printf("Tank hit");
 			playSound(gl.alSourceTick); // Plays Cannon Sound
@@ -643,7 +644,7 @@ void render() {
 		r.bot = gl.yres - 20;
 		r.left = (gl.xres / 2) - 50;
 		r.center = 1;
-		ggprint8b(&r, 16, 0x00ffff00, "");
+		ggprint8b(&r, 16, 0x00ffff00, "Artillery");
 	}
 	drawHills();
 	if (toggle) {
@@ -679,4 +680,6 @@ void render() {
 		}
 		glEnd();
 	}
+    if (gl.feature_mode == 3)
+        renderMissile();
 }
