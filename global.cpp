@@ -8,6 +8,7 @@ Global::Global() {
     yres = 858;
     std::memset(tank_keys, 0, 65536);
     std::memset(tank2_keys, 0, 65536);
+    setb = 1;
 }
 
 Tank::Tank() {
