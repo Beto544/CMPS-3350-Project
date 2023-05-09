@@ -54,7 +54,9 @@ class Global {
     char tank_keys[65536];
     char tank2_keys[65536];
     GLuint background_texture;
+    GLuint background_texturen;
     int feature_mode;
+    unsigned int setb;
     ALuint alBufferDrip, alBufferTick, alBufferWin, alBufferBackground;
     ALuint alSourceDrip, alSourceTick, alSourceWin, alSourceBackground;
     

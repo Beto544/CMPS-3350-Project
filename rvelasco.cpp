@@ -2,25 +2,11 @@
 //date: 02/22/2023
 #include <iostream>
 #include <unistd.h>
-#include <ctime>
 #include "fonts.h"
 #include "global.h"
 #include "rvelasco.h"
+#include <GL/freeglut.h>
 #include </usr/include/AL/alut.h>
-
-extern bool tankHit;
-extern bool boxHit;
-bool firework = true;
-struct Particle {
-    GLfloat color[3];
-    GLfloat velocity[2];
-    GLfloat acceleration[2];
-    GLfloat position[2];
-    GLfloat size; // Add a size member
-
-};
-
-
 //Examle used in class
 void cool_down(float *color){
     color[0] += .01;
@@ -64,7 +50,7 @@ void initSound()
     //Buffer holds the sound information.
     gl.alBufferDrip = alutCreateBufferFromFile("./sounds/Cannon2.wav");
     gl.alBufferTick = alutCreateBufferFromFile("./sounds/explode.wav");
-    gl.alBufferWin = alutCreateBufferFromFile("./sounds/VictorySound.wav");
+    gl.alBufferWin = alutCreateBufferFromFile("./sounds/mario_waha!(1).wav");
     gl.alBufferBackground = alutCreateBufferFromFile("./sounds/forest1.wav");
     //
     //Source refers to the sound.
@@ -109,7 +95,7 @@ void initSound()
     //Set volume and pitch to normal, no looping of sound.
     alSourcef(gl.alSourceBackground, AL_GAIN, 1.0f);
     alSourcef(gl.alSourceBackground, AL_PITCH, 1.0f);
-    alSourcei(gl.alSourceBackground, AL_LOOPING, AL_TRUE);
+    alSourcei(gl.alSourceBackground, AL_LOOPING, AL_FALSE);
     if (alGetError() != AL_NO_ERROR) {
         printf("ERROR: setting source\n");
         return;
@@ -145,82 +131,5 @@ void playSound(ALuint source)
 {
     alSourcePlay(source);
 }
-void RvFeaturemode(){
-    playSound(gl.alSourceWin); // Plays win Sound
-        playSound(gl.alSourceBackground); // Plays background Sound
-}
-void renderFirework()
-{
-    const int numParticles = 100;
-    static bool firstTime = true;
-    static struct timespec startTime;
-    static Particle particles[numParticles];
-
-    if (firstTime) {
-        clock_gettime(CLOCK_REALTIME, &startTime);
-        firstTime = false;
-
-        // Initialize particles
-        for (int i = 0; i < numParticles; i++) {
-            particles[i].color[0] = rnd() * 0.5f + 0.5f;
-            particles[i].color[1] = rnd() * 0.5f + 0.5f;
-            particles[i].color[2] = rnd() * 0.5f + 0.5f;
-
-            particles[i].size = rnd() * 10.0f + 5.0f;
-
-            float angle = rnd() * M_PI * 2.0f;
-            float speed = rnd() * 200.0f + 100.0f;
-            particles[i].velocity[0] = cos(angle) * speed;
-            particles[i].velocity[1] = sin(angle) * speed;
-
-            particles[i].acceleration[0] = 0.0f;
-            particles[i].acceleration[1] = -100.0f;
-        }
-    }
-
-    struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
-    double dt = timeDiff(&startTime, &currentTime);
-
-    glBegin(GL_POINTS);
-    for (int i = 0; i < numParticles; i++) {
-        if (particles[i].size > 0.0f) {
-            particles[i].velocity[0] += particles[i].acceleration[0] * dt;
-            particles[i].velocity[1] += particles[i].acceleration[1] * dt;
-            particles[i].position[0] += particles[i].velocity[0] * dt;
-            particles[i].position[1] += particles[i].velocity[1] * dt;
-
-            glColor3fv(particles[i].color);
-            glVertex2fv(particles[i].position);
-            particles[i].size -= dt * 30.0f;
-        }
-    }
-    glEnd();
-
-    if (dt > 2.0) {
-        firstTime = true;
-    }
-}
-
-void drawArrowDown(float x, float y, float size)
-{
-    glPushMatrix();
-    glTranslatef(x, y, 0);
-    glScalef(size, size, 0);
-
-    glBegin(GL_TRIANGLES);
-    glVertex2f(-0.5, 0.0);
-    glVertex2f(0.5, 0.0);
-    glVertex2f(0.0, -1.0);
-    glEnd();
-
-    glPopMatrix();
-}
-
-
-
-
-
-
 
 	
