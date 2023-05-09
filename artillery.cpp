@@ -57,6 +57,7 @@ TankStats enemyTank;
 Box box[10];
 
 Image img1("desert.jpg");
+Image img2("desert-night.jpg");
 
 
 int bot = 0;
@@ -306,6 +307,17 @@ void init_opengl(void) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
             GL_RGB, GL_UNSIGNED_BYTE, img1.data);
+
+    glGenTextures(1, &gl.background_texturen);
+    int w2 = img2.width;
+    int h2 = img2.height;
+    glBindTexture(GL_TEXTURE_2D, gl.background_texturen);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w2, h2, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, img2.data);
+
+
 }
 
 void normalize2d(Vec v) {
@@ -443,6 +455,9 @@ int check_keys(XEvent *e) {
             } else
                 gl.feature_mode = 5;
             break;
+	case XK_m:
+            	gl.setb = changeMap(gl.setb);
+             break;
 
         case XK_Tab:
             showControls = !showControls;
@@ -593,7 +608,8 @@ void render() {
     glOrtho(0, gl.xres, 0, gl.yres, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glBindTexture(GL_TEXTURE_2D, gl.background_texture);
+    
+    /*glBindTexture(GL_TEXTURE_2D, gl.background_texture);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 1);
     glVertex2f(0, 0);
@@ -604,6 +620,22 @@ void render() {
     glTexCoord2f(0, 0);
     glVertex2f(0, gl.yres);
     glEnd();
+
+
+    glBindTexture(GL_TEXTURE_2D, gl.background_texturen);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1);
+    glVertex2f(0, 0);
+    glTexCoord2f(1, 1);
+    glVertex2f(gl.xres, 0);
+    glTexCoord2f(1, 0);
+    glVertex2f(gl.xres, gl.yres);
+    glTexCoord2f(0, 0);
+    glVertex2f(0, gl.yres);
+    glEnd();
+*/
+    displayMap(gl.setb);
+
     //display();
     Rect r;
     if (gl.feature_mode) {
