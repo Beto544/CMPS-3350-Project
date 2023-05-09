@@ -3,8 +3,53 @@
 #include "sesquivel.h"
 #include "global.h"
 #include "hpascual.h"
+#include "image.h"
+#include <GL/glx.h>
+
+struct SE {
+        GLuint background_texture;
+        GLuint background_texturen;
+        int sbackground = 1;
+        SE() {
+                sbackground = 1;
+        }
+}s;
 
 
+void getMap(GLuint background_texture, GLuint background_texturen) {
+        s.background_texture = background_texture;
+        s.background_texturen = background_texturen;
+}
+
+int changeMap(int background) {
+        int newb = background + 1;
+        if (newb > 2) {
+                newb = 1;
+        }
+        return newb;
+}
+void displayMap(int b_num) {
+        if (b_num == 1) {
+		glBindTexture(GL_TEXTURE_2D, gl.background_texture);
+    		glBegin(GL_QUADS);
+    		glTexCoord2f(0, 1); glVertex2f(0, 0);
+		glTexCoord2f(1, 1); glVertex2f(gl.xres, 0);
+    		glTexCoord2f(1, 0); glVertex2f(gl.xres, gl.yres);
+    		glTexCoord2f(0, 0); glVertex2f(0, gl.yres);
+    		glEnd();
+
+        }
+        else if(b_num == 2) {
+		glBindTexture(GL_TEXTURE_2D, gl.background_texturen);
+    		glBegin(GL_QUADS);
+    		glTexCoord2f(0, 1); glVertex2f(0, 0);
+		glTexCoord2f(1, 1); glVertex2f(gl.xres, 0);
+    		glTexCoord2f(1, 0); glVertex2f(gl.xres, gl.yres);
+    		glTexCoord2f(0, 0); glVertex2f(0, gl.yres);
+    		glEnd();
+
+        }
+}
 
 void renderBars(int player, double stat) {
     float barPercentage = stat / 100;
