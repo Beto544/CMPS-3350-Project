@@ -10,6 +10,7 @@ extern int bot;
 extern float cannonVelocity1;
 extern float cannonVelocity2;
 extern bool tankHit;
+extern bool tank2Hit;
 extern bool boxHit;
 extern bool showControls;
 extern bool newRound;
@@ -296,7 +297,7 @@ void renderExplosion()
         positionx = g.tank.pos[0];
         positiony = g.tank.pos[1];
     }
-    else if (tankHit && currentPlayer % 2 != 0) {
+    else if (tank2Hit && currentPlayer % 2 != 0) {
         positionx = g.tank2.pos[0];
         positiony = g.tank2.pos[1];
     } else if (boxHit) {
@@ -319,6 +320,7 @@ void renderExplosion()
     }
     if (ts > 2.8) {
         tankHit = false;
+        tank2Hit = false;
         boxHit = false;
     }
     glEnd();
@@ -513,9 +515,8 @@ void adjustCannon(Tank *curr_tank)
 }
 
 // bot
-void botCannon() 
+void botCannon(Tank *curr_tank) 
 {
-    int count = 0;
     double error;
     double threshold = 0.250;
     double tank_pos = 0;
@@ -529,13 +530,12 @@ void botCannon()
     }
     // bot should aim towards the position of tank1
     // calc distance to tank, adjust velocity, as needed
+    g.tank.angle = 45.0;
     g.tank2.angle = 120.0;
-    if (enemyTank.getBullets() > 0 && !gameOver() && currentPlayer % 2 != 0 && bot) {
-        count++;
-        if (count <= 1) {
-            printf("Bot shot\n");
-            shootCannon(&g.tank2,cannonVelocity2);
+    if (!gameOver() && currentPlayer % 2 != 0 && bot) {
+            float randomVel = 4.0 + static_cast<float>(rand()) / 
+            (static_cast<float>(RAND_MAX / (14.0 - 4.0)));
+            shootCannon(curr_tank,randomVel);
         }
         // shootCannon(&g.tank2);
-    }
 }

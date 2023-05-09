@@ -23,7 +23,7 @@ extern float bx, by;
 Terrain::Terrain() 
 {
     w = 300.0f;
-    h = 150.0f;
+    h = 140.0f;
     pos[0] = (gl.xres/2) + 40;
     pos[1] = (gl.yres/4) - 160;
     radius = 20;

@@ -69,6 +69,7 @@ bool downPressed = false;
 bool showControls = false;
 bool newRound = false;
 bool tankHit = false;
+bool tank2Hit = false;
 bool cannonFired = false;
 bool boxHit = false;
 // the Classes - Global, Ship, Bullet, Asteroid, and Game
@@ -326,21 +327,10 @@ void check_mouse(XEvent *e, Tank *curr_tank) {
     static int savey = 0;
     //
     static int ct = 0;
-    if (e->type == ButtonRelease) {
-        return;
-    }
-    if (e->type == ButtonPress) {
-        if (e->xbutton.button == 1) {
-            // Left button is down
-        }
-        if (e->xbutton.button == 3) {
-            // Right button is down
-        }
-    }
     if (savex != e->xbutton.x || savey != e->xbutton.y) {
         // Mouse moved
         int xdiff = savex - e->xbutton.x;
-        int ydiff = savey - e->xbutton.y;
+        //int ydiff = savey - e->xbutton.y;
         if (++ct < 10)
             return;
         if (xdiff > 0) {
@@ -351,9 +341,6 @@ void check_mouse(XEvent *e, Tank *curr_tank) {
             curr_tank->angle += 0.05f * (float)xdiff;
             if (curr_tank->angle < 0.0f)
                 curr_tank->angle = 0.0f;
-        }
-        if (ydiff > 0) {
-
         }
         x11.set_mouse_position(100, 100);
         savex = 100;
@@ -506,9 +493,10 @@ void shootCannon(Tank *curr_tank,float cannonVelocity)
             b->color[1] = 1.0f;
             b->color[2] = 1.0f;
             g.nbullets++;
-            if (currentPlayer % 2 == 0) {
+            if (currentPlayer % 2 == 0 && !bot) {
                 playerTank.decreaseBullets(1);
-            } else {
+            } 
+            if (currentPlayer % 2 != 0 && !bot) {
                 enemyTank.decreaseBullets(1);
             }
             currentPlayer++;
@@ -546,8 +534,12 @@ void physics(Tank *curr_tank) {
         d1 = b->pos[1] - curr_tank->pos[1];
         dist = (d0 * d0 + d1 * d1);
         // check tank collision
-        if (dist < (curr_tank->radius * curr_tank->radius) ||tankHit) {
-            tankHit = true;
+        if (dist < (curr_tank->radius * curr_tank->radius)) {
+            if (currentPlayer %2 == 0) {
+                tankHit = true;
+            } else {
+                tank2Hit = true;
+            }
             printf("Tank hit");
             playSound(gl.alSourceTick); // Plays Cannon Sound
             //  shoot a bullet...
@@ -577,7 +569,7 @@ void physics(Tank *curr_tank) {
         adjustCannon(curr_tank);
     }
     if (bot && currentPlayer % 2 != 0) {
-        botCannon();
+        botCannon(curr_tank);
     }
     // shoot cannon when space is pressed
     if (gl.tank_keys[XK_space] && currentPlayer % 2 == 0) {
@@ -636,30 +628,25 @@ void render() {
     }
     // Hunberto's feature mode
     if (gl.feature_mode == 12) {
-        ggprint8b(&r, 16, 0x00ffffff, "Bot Demo");
-        //tankHit = true;
+        ggprint8b(&r, 16, 0x00ffffff, "Turn Switching Demo");
         bot = 1;
     } else {
         bot =0;
     }
-
     if (!gl.feature_mode) {
         r.bot = gl.yres - 20;
         r.left = (gl.xres / 2) - 50;
         r.center = 1;
-        ggprint8b(&r, 16, 0x00ffff00, "Artillery");
+        ggprint8b(&r, 16, 0x00ffff00, "");
+        renderText();
     }
     drawHills();
     if (toggle) {
         renderBoxes();
         renderTerrain();
     }
-    renderText();
     renderTanks();
-    if (tankHit) {
-        renderExplosion();
-    }
-    if (boxHit) {
+    if (tankHit || tank2Hit || boxHit) {
         renderExplosion();
     }
     renderBars(1, playerTank.getHealth());

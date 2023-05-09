@@ -23,8 +23,9 @@ extern void moveTank(Tank *curr_Tank);
 extern void checkBoxCollison(Bullet *b, int i);
 extern void renderText();
 extern void adjustCannon(Tank *curr_tank);
-extern void botCannon();
+extern void botCannon(Tank *curr_tank);
 extern bool toggle;
+extern int fib(int n);
 
 class TankStats {
    public:
